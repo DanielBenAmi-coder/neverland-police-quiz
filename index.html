@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Neverland Police ג€” ׳‘׳—׳™׳ ׳” ׳•׳×׳¨׳’׳•׳</title>
+  <title>Neverland Police — בחינה ותרגול</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -15,74 +15,74 @@
   <header class="site-header">
     <div class="badge" aria-hidden="true">NP</div>
     <div class="header-text">
-      <h1>׳׳©׳˜׳¨׳× ׳ ׳‘׳¨׳׳ ׳“</h1>
-      <p>׳׳¢׳¨׳›׳× ׳‘׳—׳™׳ ׳” ׳•׳×׳¨׳’׳•׳ ג€” Police Handbook</p>
+      <h1>משטרת נברלנד</h1>
+      <p>מערכת בחינה ותרגול — Police Handbook</p>
     </div>
   </header>
 
   <main id="app">
     <section id="screen-home" class="screen active">
       <div class="hero-card">
-        <h2>׳‘׳¨׳•׳›׳™׳ ׳”׳‘׳׳™׳ ׳׳×׳¨׳’׳•׳</h2>
-        <p>׳‘׳—׳™׳¨׳”, ׳ ׳›׳•׳/׳׳ ׳ ׳›׳•׳, ׳×׳¨׳—׳™׳©׳™׳ ׳•׳©׳׳׳•׳× ׳׳׳›׳•׳“׳•׳× ג€” ׳¡׳“׳¨ ׳”׳©׳׳׳•׳× ׳•׳”׳×׳©׳•׳‘׳•׳× ׳׳©׳×׳ ׳” ׳‘׳›׳ ׳₪׳¢׳.</p>
+        <h2>ברוכים הבאים לתרגול</h2>
+        <p>בחירה, נכון/לא נכון, תרחישים ושאלות מלכודות — סדר השאלות והתשובות משתנה בכל פעם.</p>
       </div>
 
       <div class="mode-grid">
         <button type="button" class="mode-card" data-mode="practice">
-          <span class="mode-icon">נ“–</span>
-          <h3>׳×׳¨׳’׳•׳</h3>
-          <p>׳‘׳—׳¨׳• ׳“׳¨׳’׳”: ׳§׳“׳˜ג†’Officer ׳׳• Officerג†’Senior</p>
+          <span class="mode-icon">📖</span>
+          <h3>תרגול</h3>
+          <p>בחרו דרגה: קדט→Officer או Officer→Senior</p>
         </button>
         <button type="button" class="mode-card" data-mode="exam">
-          <span class="mode-icon">נ“</span>
-          <h3>׳‘׳—׳™׳ ׳”</h3>
-          <p>׳‘׳—׳¨׳• ׳׳¡׳׳•׳: ׳§׳“׳˜ג†’Officer ׳׳• Officerג†’Senior</p>
+          <span class="mode-icon">📝</span>
+          <h3>בחינה</h3>
+          <p>בחרו מסלול: קדט→Officer או Officer→Senior</p>
         </button>
         <button type="button" class="mode-card" data-mode="category">
-          <span class="mode-icon">נ—‚ן¸</span>
-          <h3>׳׳₪׳™ ׳ ׳•׳©׳</h3>
-          <p>25 ׳©׳׳׳•׳× ׳׳ ׳•׳©׳ ֲ· ׳¡׳•׳’׳™׳ ׳׳¢׳•׳¨׳‘׳™׳</p>
+          <span class="mode-icon">🗂️</span>
+          <h3>לפי נושא</h3>
+          <p>25 שאלות לנושא · סוגים מעורבים</p>
         </button>
       </div>
 
       <div class="stats-bar" id="stats-bar">
         <div class="stat">
           <span class="stat-value" id="stat-attempts">0</span>
-          <span class="stat-label">׳ ׳™׳¡׳™׳•׳ ׳•׳×</span>
+          <span class="stat-label">ניסיונות</span>
         </div>
         <div class="stat">
-          <span class="stat-value stat-small" id="stat-best-cadet">ג€”</span>
-          <span class="stat-label">׳׳™׳˜׳‘׳™ ׳§׳“׳˜ג†’Officer</span>
+          <span class="stat-value stat-small" id="stat-best-cadet">—</span>
+          <span class="stat-label">מיטבי קדט→Officer</span>
         </div>
         <div class="stat">
-          <span class="stat-value stat-small" id="stat-best-senior">ג€”</span>
-          <span class="stat-label">׳׳™׳˜׳‘׳™ Officerג†’Senior</span>
+          <span class="stat-value stat-small" id="stat-best-senior">—</span>
+          <span class="stat-label">מיטבי Officer→Senior</span>
         </div>
         <div class="stat">
           <span class="stat-value" id="stat-questions">0</span>
-          <span class="stat-label">׳©׳׳׳•׳× ׳‘׳׳׳’׳¨</span>
+          <span class="stat-label">שאלות במאגר</span>
         </div>
       </div>
 
       <div class="rank-panel hidden" id="rank-panel">
-        <h3 id="rank-panel-title">׳‘׳—׳¨׳• ׳“׳¨׳’׳”</h3>
+        <h3 id="rank-panel-title">בחרו דרגה</h3>
         <div class="exam-level-grid" id="rank-level-grid"></div>
-        <button type="button" class="btn btn-ghost" id="cancel-rank">׳—׳–׳¨׳”</button>
+        <button type="button" class="btn btn-ghost" id="cancel-rank">חזרה</button>
       </div>
 
       <div class="category-panel hidden" id="category-panel">
-        <h3>׳‘׳—׳¨׳• ׳ ׳•׳©׳</h3>
+        <h3>בחרו נושא</h3>
         <div class="category-chips" id="category-chips"></div>
-        <button type="button" class="btn btn-ghost" id="cancel-category">׳—׳–׳¨׳”</button>
+        <button type="button" class="btn btn-ghost" id="cancel-category">חזרה</button>
       </div>
     </section>
 
     <section id="screen-quiz" class="screen">
       <div class="quiz-top">
-        <button type="button" class="btn btn-ghost btn-sm" id="btn-quit">׳™׳¦׳™׳׳”</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-quit">יציאה</button>
         <div class="progress-wrap">
           <div class="progress-meta">
-            <span id="quiz-mode-label">׳×׳¨׳’׳•׳</span>
+            <span id="quiz-mode-label">תרגול</span>
             <span id="quiz-counter">1 / 20</span>
           </div>
           <div class="progress-track">
@@ -100,11 +100,11 @@
       <div class="feedback hidden" id="feedback-panel">
         <p class="feedback-result" id="feedback-result"></p>
         <p class="feedback-explanation" id="feedback-explanation"></p>
-        <button type="button" class="btn btn-primary" id="btn-next">׳”׳©׳׳׳” ׳”׳‘׳׳”</button>
+        <button type="button" class="btn btn-primary" id="btn-next">השאלה הבאה</button>
       </div>
 
       <div class="quiz-actions hidden" id="exam-actions">
-        <button type="button" class="btn btn-primary" id="btn-submit-exam" disabled>׳¡׳™׳•׳ ׳‘׳—׳™׳ ׳”</button>
+        <button type="button" class="btn btn-primary" id="btn-submit-exam" disabled>סיום בחינה</button>
       </div>
     </section>
 
@@ -114,23 +114,23 @@
         <div class="score-ring" id="score-ring">
           <span class="score-value" id="final-score">0%</span>
         </div>
-        <h2 id="results-title">׳¡׳™׳™׳׳×׳!</h2>
+        <h2 id="results-title">סיימתם!</h2>
         <p id="results-summary"></p>
         <div class="results-breakdown" id="results-breakdown"></div>
         <div class="wrong-review hidden" id="wrong-review">
-          <h3>׳©׳׳׳•׳× ׳׳—׳–׳¨׳”</h3>
+          <h3>שאלות לחזרה</h3>
           <ul id="wrong-list"></ul>
         </div>
         <div class="results-actions">
-          <button type="button" class="btn btn-primary" id="btn-retry">׳ ׳¡׳• ׳©׳•׳‘</button>
-          <button type="button" class="btn btn-ghost" id="btn-home">׳“׳£ ׳”׳‘׳™׳×</button>
+          <button type="button" class="btn btn-primary" id="btn-retry">נסו שוב</button>
+          <button type="button" class="btn btn-ghost" id="btn-home">דף הבית</button>
         </div>
       </div>
     </section>
   </main>
 
   <footer class="site-footer">
-    <p>Neverland Police Handbook ֲ· ׳׳©׳™׳׳•׳© ׳₪׳ ׳™׳׳™ ׳‘׳׳‘׳“</p>
+    <p>Neverland Police Handbook · לשימוש פנימי בלבד</p>
   </footer>
 
   <script src="js/questions.js"></script>

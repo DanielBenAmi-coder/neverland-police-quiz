@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   --bg: #0a0f1a;
   --surface: #111827;
   --surface-2: #1a2332;
@@ -171,6 +171,7 @@ body {
   color: var(--muted);
   line-height: 1.45;
 }
+
 
 .stats-bar {
   display: flex;
