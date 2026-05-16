@@ -15,12 +15,13 @@
 
   const $ = (sel) => document.querySelector(sel);
 
-  const screens = {
-    home: $("#screen-home"),
-    quiz: $("#screen-quiz"),
-    results: $("#screen-results"),
-    assistant: $("#screen-assistant"),
-  };
+  const screens = {};
+
+  function initScreens() {
+    screens.home = document.getElementById("screen-home");
+    screens.quiz = document.getElementById("screen-quiz");
+    screens.results = document.getElementById("screen-results");
+  }
 
   let state = {
     mode: "practice",
@@ -227,8 +228,33 @@
   }
 
   function showScreen(name) {
-    Object.values(screens).forEach((el) => el.classList.remove("active"));
-    screens[name].classList.add("active");
+    const target = screens[name];
+    if (!target) {
+      console.error("מסך לא נמצא:", name);
+      return;
+    }
+    Object.keys(screens).forEach((key) => {
+      const el = screens[key];
+      if (el) el.classList.remove("active");
+    });
+    target.classList.add("active");
+  }
+
+  function handleModeClick(mode) {
+    if (mode === "exam") {
+      showRankPanel("exam");
+      return;
+    }
+    if (mode === "practice") {
+      showRankPanel("practice");
+      return;
+    }
+    if (mode === "category") {
+      $("#category-panel").classList.remove("hidden");
+      $("#rank-panel").classList.add("hidden");
+      document.querySelector(".mode-grid").classList.add("hidden");
+      return;
+    }
   }
 
   function updateHomeStats() {
@@ -543,32 +569,19 @@
   }
 
   function init() {
+    initScreens();
     updateHomeStats();
     buildCategoryChips();
-    document.querySelectorAll(".mode-card").forEach((card) => {
-      card.addEventListener("click", () => {
+
+    const modeGrid = document.querySelector(".mode-grid");
+    if (modeGrid) {
+      modeGrid.addEventListener("click", (e) => {
+        const card = e.target.closest(".mode-card");
+        if (!card || !modeGrid.contains(card)) return;
         const mode = card.dataset.mode;
-        if (mode === "exam") {
-          showRankPanel("exam");
-          return;
-        }
-        if (mode === "practice") {
-          showRankPanel("practice");
-          return;
-        }
-        if (mode === "category") {
-          $("#category-panel").classList.remove("hidden");
-          $("#rank-panel").classList.add("hidden");
-          document.querySelector(".mode-grid").classList.add("hidden");
-          return;
-        }
-        if (mode === "assistant") {
-          hidePanels();
-          showScreen("assistant");
-          return;
-        }
+        if (mode) handleModeClick(mode);
       });
-    });
+    }
 
     $("#cancel-rank").addEventListener("click", hidePanels);
 
@@ -600,13 +613,9 @@
       }
     });
 
-    $("#btn-home").addEventListener("click", () => showScreen("home"));
-    $("#btn-assistant-home").addEventListener("click", () => showScreen("home"));
+    $("#btn-home")?.addEventListener("click", () => showScreen("home"));
 
-    if (window.NeverlandAI) {
-      window.NeverlandAI.init();
-    }
-    $("#btn-retry").addEventListener("click", () => {
+    $("#btn-retry")?.addEventListener("click", () => {
       startQuiz(state.mode, state.category, state.rankLevel);
     });
   }
