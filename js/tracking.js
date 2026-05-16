@@ -114,6 +114,10 @@
 
     saveLocalLog(entry);
 
+    if (!(cfg().apiBase || "").trim()) {
+      return entry;
+    }
+
     try {
       const res = await fetch(apiUrl("/api/log"), {
         method: "POST",

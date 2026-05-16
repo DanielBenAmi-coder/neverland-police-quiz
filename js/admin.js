@@ -17,6 +17,11 @@
     return window.SITE_CONFIG || {};
   }
 
+  function isValidAdminCode(code) {
+    const expected = (cfg().adminCode || "Rasputin").trim().toLowerCase();
+    return code.trim().toLowerCase() === expected;
+  }
+
   function apiUrl(path) {
     const base = (cfg().apiBase || "").replace(/\/$/, "");
     return `${base}${path}`;
@@ -131,25 +136,39 @@
     const code = getAdminCode();
     if (!code) return;
 
-    if (status) status.textContent = "טוען לוגים...";
+    const local = window.NeverlandTracking?.getLocalLogs?.() || [];
+    const apiBase = (cfg().apiBase || "").trim();
+
+    if (!apiBase) {
+      cachedLogs = local;
+      renderStats(cachedLogs);
+      renderTable(cachedLogs, document.getElementById("admin-filter-name")?.value || "");
+      if (status) {
+        status.textContent =
+          local.length > 0
+            ? `לוגים מהדפדפן הזה בלבד (${local.length}). ללוגים מכל השוטרים — חברו Vercel.`
+            : "אין עדיין לוגים בדפדפן זה. שוטרים צריכים להיכנס עם שם ולתרגל.";
+      }
+      return;
+    }
+
+    if (status) status.textContent = "טוען לוגים מהשרת...";
 
     try {
       const data = await fetchServerLogs(code);
-      cachedLogs = mergeLogs(data.logs || [], window.NeverlandTracking?.getLocalLogs?.() || []);
+      cachedLogs = mergeLogs(data.logs || [], local);
       renderStats(cachedLogs);
       const filter = document.getElementById("admin-filter-name");
       renderTable(cachedLogs, filter?.value || "");
       if (status) {
-        status.textContent = data.store === "memory"
-          ? "מצב זיכרון זמני — הגדירו Upstash ב-Vercel לשמירה קבועה"
-          : `נטענו ${cachedLogs.length} רשומות מהשרת`;
+        status.textContent = `נטענו ${cachedLogs.length} רשומות (שרת + מקומי)`;
       }
-    } catch (err) {
-      cachedLogs = window.NeverlandTracking?.getLocalLogs?.() || [];
+    } catch {
+      cachedLogs = local;
       renderStats(cachedLogs);
       renderTable(cachedLogs, document.getElementById("admin-filter-name")?.value || "");
       if (status) {
-        status.textContent = `שרת לא זמין — מוצגים לוגים מקומיים בלבד (${cachedLogs.length})`;
+        status.textContent = `שרת לא זמין — מוצגים לוגים מקומיים (${local.length})`;
       }
     }
   }
@@ -190,17 +209,17 @@
       const code = (input?.value || "").trim();
       if (!code) return;
 
-      try {
-        await fetchServerLogs(code);
-        setAdminCode(code);
-        if (err) err.classList.add("hidden");
-        showLogsPanel();
-      } catch {
+      if (!isValidAdminCode(code)) {
         if (err) {
-          err.textContent = "קוד מנהל שגוי או השרת לא מוגדר";
+          err.textContent = "קוד מנהל שגוי (נסו: Rasputin)";
           err.classList.remove("hidden");
         }
+        return;
       }
+
+      setAdminCode(code);
+      if (err) err.classList.add("hidden");
+      showLogsPanel();
     });
 
     document.getElementById("btn-admin-refresh")?.addEventListener("click", loadLogs);

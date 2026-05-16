@@ -1,18 +1,17 @@
 /**
- * אחרי פריסה ב-Vercel — עדכנו את apiBase לכתובת הפרויקט שלכם.
- * לדוגמה: https://neverland-police-quiz.vercel.app
+ * adminCode — קוד כניסת מנהל (עובד גם בלי שרת).
+ * apiBase — כתובת Vercel אחרי שמחברים את הריפו (ללוגים משותפים לכולם).
  */
 (function () {
   const host = window.location.hostname;
   let apiBase = "";
 
-  if (host === "danielbenami-coder.github.io") {
-    apiBase = "https://neverland-police-quiz.vercel.app";
-  } else if (host.includes("vercel.app") || host === "localhost" || host === "127.0.0.1") {
+  if (host.includes("vercel.app") || host === "localhost" || host === "127.0.0.1") {
     apiBase = "";
   }
 
   window.SITE_CONFIG = {
+    adminCode: "Rasputin",
     apiBase,
     requireName: true,
   };
