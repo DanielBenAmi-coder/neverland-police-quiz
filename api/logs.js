@@ -1,11 +1,15 @@
 const { readLogs } = require("./_lib/redis");
 const { handleOptions, jsonResponse } = require("./_lib/cors");
 
+const DEFAULT_ADMIN_CODE = "Rasputin";
+
+function getAdminCode() {
+  return process.env.ADMIN_CODE || DEFAULT_ADMIN_CODE;
+}
+
 function checkAdmin(req) {
-  const code = process.env.ADMIN_CODE;
-  if (!code) return false;
   const sent = req.headers["x-admin-code"] || "";
-  return sent === code;
+  return sent === getAdminCode();
 }
 
 module.exports = async function handler(req, res) {
@@ -14,10 +18,6 @@ module.exports = async function handler(req, res) {
   if (req.method === "OPTIONS") return handleOptions(req, res);
   if (req.method !== "GET") {
     return jsonResponse(res, 405, { error: "Method not allowed" }, origin);
-  }
-
-  if (!process.env.ADMIN_CODE) {
-    return jsonResponse(res, 503, { error: "ADMIN_CODE לא הוגדר בשרת" }, origin);
   }
 
   if (!checkAdmin(req)) {
