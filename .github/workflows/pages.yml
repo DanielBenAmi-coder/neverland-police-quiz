@@ -26,5 +26,9 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
+          exclude-paths: |
+            node_modules
+            .git
+            .env
       - uses: actions/deploy-pages@v4
         id: deployment
