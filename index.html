@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=3" />
+  <link rel="stylesheet" href="css/style.css?v=4" />
 </head>
 <body>
   <div class="bg-grid" aria-hidden="true"></div>
@@ -18,6 +18,10 @@
     <div class="header-text">
       <h1>משטרת נברלנד</h1>
       <p>מערכת בחינה ותרגול — Police Handbook</p>
+    </div>
+    <div class="header-actions">
+      <span id="officer-name-badge" class="officer-name-badge hidden"></span>
+      <button type="button" class="btn btn-ghost btn-sm" id="btn-change-name" title="שינוי שם">שם</button>
     </div>
   </header>
 
@@ -128,15 +132,73 @@
         </div>
       </div>
     </section>
+
+    <section id="screen-admin" class="screen">
+      <div class="admin-top">
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-admin-back">חזרה לדף הבית</button>
+        <h2>לוח מנהל — לוגים</h2>
+      </div>
+
+      <div id="admin-login-panel" class="admin-panel">
+        <p class="admin-hint">הזינו קוד מנהל לצפייה בלוגי שימוש לפי שם שוטר.</p>
+        <form id="admin-login-form" class="admin-login-form">
+          <label for="admin-code-input">קוד מנהל</label>
+          <input type="password" id="admin-code-input" class="admin-input" autocomplete="off" />
+          <p id="admin-login-error" class="admin-error hidden"></p>
+          <button type="submit" class="btn btn-primary">כניסה</button>
+        </form>
+      </div>
+
+      <div id="admin-logs-panel" class="admin-panel hidden">
+        <div class="admin-toolbar">
+          <input type="search" id="admin-filter-name" class="admin-input" placeholder="סינון לפי שם שוטר..." />
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-admin-refresh">רענון</button>
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-admin-logout">יציאה</button>
+        </div>
+        <p id="admin-status" class="admin-status"></p>
+        <div id="admin-stats" class="admin-stats"></div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>זמן</th>
+                <th>שם</th>
+                <th>פעולה</th>
+                <th>פרטים</th>
+              </tr>
+            </thead>
+            <tbody id="admin-logs-body"></tbody>
+          </table>
+          <p id="admin-logs-empty" class="admin-empty hidden">אין לוגים להצגה</p>
+        </div>
+      </div>
+    </section>
   </main>
+
+  <div id="name-gate-modal" class="name-gate-modal hidden" role="dialog" aria-modal="true" aria-labelledby="name-gate-title">
+    <div class="name-gate-card">
+      <h2 id="name-gate-title">זיהוי שוטר/ת</h2>
+      <p>לפני השימוש באתר, הזינו את <strong>שמכם בשרת</strong> (כפי שמופיע במשטרה).</p>
+      <form id="name-gate-form">
+        <label for="name-gate-input">שם בשרת</label>
+        <input type="text" id="name-gate-input" class="admin-input" placeholder="לדוגמה: David Cohen" maxlength="32" autocomplete="name" required />
+        <p id="name-gate-error" class="admin-error hidden"></p>
+        <button type="submit" class="btn btn-primary">כניסה לתרגול</button>
+      </form>
+    </div>
+  </div>
 
   <footer class="site-footer">
     <p>Neverland Police Handbook · לשימוש פנימי בלבד</p>
+    <button type="button" class="footer-admin-link" id="btn-admin-entry">כניסת מנהל</button>
   </footer>
 
-  <script src="js/questions.js?v=3"></script>
-  <script src="js/questions-extra.js?v=3"></script>
-  <script src="js/question-levels.js?v=3"></script>
-  <script src="js/app.js?v=3"></script>
+  <script src="js/site-config.js?v=4"></script>
+  <script src="js/tracking.js?v=4"></script>
+  <script src="js/admin.js?v=4"></script>
+  <script src="js/questions.js?v=4"></script>
+  <script src="js/questions-extra.js?v=4"></script>
+  <script src="js/question-levels.js?v=4"></script>
+  <script src="js/app.js?v=4"></script>
 </body>
 </html>

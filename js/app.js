@@ -240,16 +240,23 @@
     target.classList.add("active");
   }
 
+  function track(event, data) {
+    window.NeverlandTracking?.log?.(event, data);
+  }
+
   function handleModeClick(mode) {
     if (mode === "exam") {
+      track("mode_open", { mode: "exam", label: "פתיחת בחינה" });
       showRankPanel("exam");
       return;
     }
     if (mode === "practice") {
+      track("mode_open", { mode: "practice", label: "פתיחת תרגול" });
       showRankPanel("practice");
       return;
     }
     if (mode === "category") {
+      track("mode_open", { mode: "category", label: "פתיחת לפי נושא" });
       $("#category-panel").classList.remove("hidden");
       $("#rank-panel").classList.add("hidden");
       document.querySelector(".mode-grid").classList.add("hidden");
@@ -374,6 +381,14 @@
     $("#feedback-panel").classList.add("hidden");
     $("#exam-actions").classList.toggle("hidden", mode !== "exam");
     $("#btn-submit-exam").disabled = true;
+
+    track("quiz_start", {
+      mode,
+      rank: rankLevel,
+      category: category || null,
+      questions: questions.length,
+      label: rankConfig?.title || category || mode,
+    });
 
     showScreen("quiz");
     renderQuestion();
@@ -565,6 +580,16 @@
       wrongReview.classList.add("hidden");
     }
 
+    track("quiz_finish", {
+      mode: state.mode,
+      rank: state.rankLevel,
+      category: state.category,
+      score: pct,
+      passed,
+      questions: total,
+      label: state.rankConfig?.title || state.category || state.mode,
+    });
+
     showScreen("results");
   }
 
@@ -609,6 +634,11 @@
 
     $("#btn-quit").addEventListener("click", () => {
       if (confirm("לצאת מהמבחן? ההתקדמות לא תישמר.")) {
+        track("quit_quiz", {
+          mode: state.mode,
+          rank: state.rankLevel,
+          label: "יציאה ממבחן לפני סיום",
+        });
         showScreen("home");
       }
     });
@@ -620,9 +650,19 @@
     });
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
+  async function boot() {
+    if (window.NeverlandTracking?.init) {
+      await window.NeverlandTracking.init();
+    }
+    if (window.NeverlandAdmin?.init) {
+      window.NeverlandAdmin.init();
+    }
     init();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
   }
 })();
