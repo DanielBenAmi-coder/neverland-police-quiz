@@ -114,31 +114,8 @@
 
     saveLocalLog(entry);
 
-    if (!(cfg().apiBase || "").trim()) {
-      return entry;
-    }
-
-    try {
-      const res = await fetch(apiUrl("/api/log"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          event,
-          mode: entry.mode,
-          rank: entry.rank,
-          category: entry.category,
-          score: entry.score,
-          passed: entry.passed,
-          questions: entry.questions,
-          label: entry.label,
-        }),
-      });
-      if (!res.ok) {
-        console.warn("Log API:", await res.text());
-      }
-    } catch (err) {
-      console.warn("Log API offline:", err.message);
+    if (window.NeverlandLogs?.push) {
+      await window.NeverlandLogs.push(entry);
     }
 
     return entry;

@@ -22,11 +22,6 @@
     return code.trim().toLowerCase() === expected;
   }
 
-  function apiUrl(path) {
-    const base = (cfg().apiBase || "").replace(/\/$/, "");
-    return `${base}${path}`;
-  }
-
   function getAdminCode() {
     return sessionStorage.getItem(ADMIN_CODE_KEY) || "";
   }
@@ -63,13 +58,36 @@
     return parts.join(" · ") || "—";
   }
 
-  function mergeLogs(serverLogs, localLogs) {
-    const map = new Map();
-    [...serverLogs, ...localLogs].forEach((log) => {
-      if (!log || !log.id) return;
-      map.set(log.id, log);
+  function groupByName(logs) {
+    const groups = new Map();
+    logs.forEach((log) => {
+      const name = (log.name || "לא ידוע").trim();
+      if (!groups.has(name)) groups.set(name, []);
+      groups.get(name).push(log);
     });
-    return [...map.values()].sort((a, b) => (b.ts || "").localeCompare(a.ts || ""));
+
+    return [...groups.entries()]
+      .sort((a, b) => a[0].localeCompare(b[0], "he"))
+      .map(([name, items]) => ({
+        name,
+        items: items.sort((a, b) => (b.ts || "").localeCompare(a.ts || "")),
+      }));
+  }
+
+  function officerSummary(items) {
+    const quizzes = items.filter((l) => l.event === "quiz_finish");
+    const last = items[0];
+    const scores = quizzes.map((q) => q.score).filter((s) => s != null);
+    const avg =
+      scores.length > 0
+        ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+        : null;
+
+    let line = `${items.length} פעולות`;
+    if (quizzes.length) line += ` · ${quizzes.length} מבחנים/תרגולים`;
+    if (avg != null) line += ` · ממוצע ${avg}%`;
+    if (last?.ts) line += ` · אחרון: ${formatTime(last.ts)}`;
+    return line;
   }
 
   function renderStats(logs) {
@@ -87,48 +105,66 @@
     }).length;
 
     el.innerHTML = `
-      <div class="admin-stat-card"><span class="num">${logs.length}</span><span class="lbl">אירועים</span></div>
       <div class="admin-stat-card"><span class="num">${names.size}</span><span class="lbl">שוטרים</span></div>
+      <div class="admin-stat-card"><span class="num">${logs.length}</span><span class="lbl">אירועים</span></div>
       <div class="admin-stat-card"><span class="num">${todayCount}</span><span class="lbl">היום</span></div>
     `;
   }
 
-  function renderTable(logs, filterName) {
-    const tbody = document.getElementById("admin-logs-body");
+  function renderGroupedLogs(logs, filterName) {
+    const container = document.getElementById("admin-logs-grouped");
     const empty = document.getElementById("admin-logs-empty");
-    if (!tbody) return;
+    if (!container) return;
 
     const q = (filterName || "").trim().toLowerCase();
     const filtered = q
       ? logs.filter((l) => (l.name || "").toLowerCase().includes(q))
       : logs;
 
-    tbody.innerHTML = "";
-    if (filtered.length === 0) {
+    const groups = groupByName(filtered);
+    container.innerHTML = "";
+
+    if (groups.length === 0) {
       if (empty) empty.classList.remove("hidden");
       return;
     }
     if (empty) empty.classList.add("hidden");
 
-    filtered.forEach((log) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${formatTime(log.ts)}</td>
-        <td><strong>${log.name || "—"}</strong></td>
-        <td>${eventLabel(log.event)}</td>
-        <td>${detailText(log)}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
+    groups.forEach((group) => {
+      const card = document.createElement("article");
+      card.className = "admin-officer-card";
 
-  async function fetchServerLogs(code) {
-    const res = await fetch(apiUrl("/api/logs?limit=400"), {
-      headers: { "X-Admin-Code": code },
+      const rows = group.items
+        .map(
+          (log) => `
+        <tr>
+          <td>${formatTime(log.ts)}</td>
+          <td>${eventLabel(log.event)}</td>
+          <td>${detailText(log)}</td>
+        </tr>`
+        )
+        .join("");
+
+      card.innerHTML = `
+        <header class="admin-officer-head">
+          <h3>${group.name}</h3>
+          <p>${officerSummary(group.items)}</p>
+        </header>
+        <div class="admin-table-wrap">
+          <table class="admin-table admin-table-nested">
+            <thead>
+              <tr>
+                <th>זמן</th>
+                <th>פעולה</th>
+                <th>פרטים</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      `;
+      container.appendChild(card);
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "שגיאה בטעינת לוגים");
-    return data;
   }
 
   async function loadLogs() {
@@ -136,39 +172,25 @@
     const code = getAdminCode();
     if (!code) return;
 
-    const local = window.NeverlandTracking?.getLocalLogs?.() || [];
-    const apiBase = (cfg().apiBase || "").trim();
+    if (status) status.textContent = "טוען לוגים...";
 
-    if (!apiBase) {
-      cachedLogs = local;
-      renderStats(cachedLogs);
-      renderTable(cachedLogs, document.getElementById("admin-filter-name")?.value || "");
-      if (status) {
+    cachedLogs = await window.NeverlandLogs.fetchAll(code, 500);
+
+    renderStats(cachedLogs);
+    const filter = document.getElementById("admin-filter-name")?.value || "";
+    renderGroupedLogs(cachedLogs, filter);
+
+    const hasCloud = window.NeverlandLogs?.hasCloud?.();
+    const names = new Set(cachedLogs.map((l) => l.name)).size;
+
+    if (status) {
+      if (hasCloud) {
+        status.textContent = `לוגים מ-${names} שוטרים · סה"כ ${cachedLogs.length} אירועים (שרת משותף)`;
+      } else if (cachedLogs.length > 0) {
+        status.textContent = `לוגים מקומיים בלבד (${cachedLogs.length}). הגדירו Supabase ב-site-config.js ללוגים מכל השוטרים.`;
+      } else {
         status.textContent =
-          local.length > 0
-            ? `לוגים מהדפדפן הזה בלבד (${local.length}). ללוגים מכל השוטרים — חברו Vercel.`
-            : "אין עדיין לוגים בדפדפן זה. שוטרים צריכים להיכנס עם שם ולתרגל.";
-      }
-      return;
-    }
-
-    if (status) status.textContent = "טוען לוגים מהשרת...";
-
-    try {
-      const data = await fetchServerLogs(code);
-      cachedLogs = mergeLogs(data.logs || [], local);
-      renderStats(cachedLogs);
-      const filter = document.getElementById("admin-filter-name");
-      renderTable(cachedLogs, filter?.value || "");
-      if (status) {
-        status.textContent = `נטענו ${cachedLogs.length} רשומות (שרת + מקומי)`;
-      }
-    } catch {
-      cachedLogs = local;
-      renderStats(cachedLogs);
-      renderTable(cachedLogs, document.getElementById("admin-filter-name")?.value || "");
-      if (status) {
-        status.textContent = `שרת לא זמין — מוצגים לוגים מקומיים (${local.length})`;
+          "אין לוגים עדיין. שוטרים צריכים להיכנס עם שם בשרת ולתרגל.";
       }
     }
   }
@@ -229,7 +251,7 @@
     });
 
     document.getElementById("admin-filter-name")?.addEventListener("input", (e) => {
-      renderTable(cachedLogs, e.target.value || "");
+      renderGroupedLogs(cachedLogs, e.target.value || "");
     });
   }
 

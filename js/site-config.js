@@ -1,6 +1,10 @@
 /**
- * adminCode — קוד כניסת מנהל (עובד גם בלי שרת).
- * apiBase — כתובת Vercel אחרי שמחברים את הריפו (ללוגים משותפים לכולם).
+ * לוגים משותפים לכל השוטרים — הגדירו Supabase (חינם, 5 דקות):
+ * 1. supabase.com → New project
+ * 2. SQL Editor → הריצו את supabase/schema.sql
+ * 3. Settings → API → העתיקו URL + anon key לכאן
+ *
+ * או: הוסיפו ב-GitHub Secrets את SUPABASE_URL ו-SUPABASE_ANON_KEY
  */
 (function () {
   const host = window.location.hostname;
@@ -12,6 +16,8 @@
 
   window.SITE_CONFIG = {
     adminCode: "Rasputin",
+    supabaseUrl: "",
+    supabaseAnonKey: "",
     apiBase,
     requireName: true,
   };

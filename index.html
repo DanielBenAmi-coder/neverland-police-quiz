@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=6" />
+  <link rel="stylesheet" href="css/style.css?v=7" />
 </head>
 <body>
   <div class="bg-grid" aria-hidden="true"></div>
@@ -157,20 +157,8 @@
         </div>
         <p id="admin-status" class="admin-status"></p>
         <div id="admin-stats" class="admin-stats"></div>
-        <div class="admin-table-wrap">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>זמן</th>
-                <th>שם</th>
-                <th>פעולה</th>
-                <th>פרטים</th>
-              </tr>
-            </thead>
-            <tbody id="admin-logs-body"></tbody>
-          </table>
-          <p id="admin-logs-empty" class="admin-empty hidden">אין לוגים להצגה</p>
-        </div>
+        <div id="admin-logs-grouped" class="admin-logs-grouped"></div>
+        <p id="admin-logs-empty" class="admin-empty hidden">אין לוגים להצגה</p>
       </div>
     </section>
   </main>
@@ -193,12 +181,13 @@
     <button type="button" class="footer-admin-link" id="btn-admin-entry">כניסת מנהל</button>
   </footer>
 
-  <script src="js/site-config.js?v=6"></script>
-  <script src="js/tracking.js?v=6"></script>
-  <script src="js/admin.js?v=6"></script>
-  <script src="js/questions.js?v=6"></script>
-  <script src="js/questions-extra.js?v=6"></script>
-  <script src="js/question-levels.js?v=6"></script>
-  <script src="js/app.js?v=6"></script>
+  <script src="js/site-config.js?v=7"></script>
+  <script src="js/logs-store.js?v=7"></script>
+  <script src="js/tracking.js?v=7"></script>
+  <script src="js/admin.js?v=7"></script>
+  <script src="js/questions.js?v=7"></script>
+  <script src="js/questions-extra.js?v=7"></script>
+  <script src="js/question-levels.js?v=7"></script>
+  <script src="js/app.js?v=7"></script>
 </body>
 </html>
