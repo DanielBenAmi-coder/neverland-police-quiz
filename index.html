@@ -119,8 +119,11 @@
       <div class="assistant-header">
         <button type="button" class="btn btn-ghost btn-sm" id="btn-assistant-home">חזרה</button>
         <div class="assistant-title-wrap">
-          <h2>יועץ נהלים AI</h2>
-          <span class="ai-mode-badge ai-mode-local" id="ai-mode-badge">מצב מאגר</span>
+          <img src="assets/rasputin.png" alt="רספוטין" class="rasputin-avatar rasputin-avatar-lg" width="56" height="56" />
+          <div>
+            <h2>שאל את רספוטין</h2>
+            <span class="ai-mode-badge ai-mode-local" id="ai-mode-badge">מצב מאגר</span>
+          </div>
         </div>
         <button type="button" class="btn btn-ghost btn-sm" id="btn-ai-settings">הגדרות</button>
       </div>
@@ -160,8 +163,8 @@
           <textarea
             id="ai-input"
             rows="2"
-            placeholder="שאלו על נהלים, משמרת, מדים, תחנה..."
-            aria-label="שאלה ליועץ הנהלים"
+            placeholder="שאלו את רספוטין על נהלים, משמרת, מדים..."
+            aria-label="שאלה לרספוטין"
           ></textarea>
           <button type="submit" class="btn btn-primary ai-send" id="ai-send">שלח</button>
         </form>

@@ -668,13 +668,58 @@ body {
 }
 
 .assistant-title-wrap {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
   flex: 1;
+  text-align: right;
 }
 
 .assistant-title-wrap h2 {
   font-size: 1.1rem;
   margin-bottom: 0.35rem;
+}
+
+.rasputin-avatar {
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--gold);
+  box-shadow: 0 0 16px var(--gold-dim);
+  flex-shrink: 0;
+}
+
+.rasputin-avatar-lg {
+  width: 56px;
+  height: 56px;
+}
+
+.rasputin-avatar-sm {
+  width: 40px;
+  height: 40px;
+  align-self: flex-end;
+}
+
+.mode-icon-rasputin {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.mode-icon-rasputin img {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--gold);
+  box-shadow: 0 0 14px var(--gold-dim);
+}
+
+
+.ai-msg-body {
+  flex: 1;
+  min-width: 0;
+  max-width: calc(100% - 48px);
 }
 
 .ai-mode-badge {
@@ -767,6 +812,8 @@ body {
 
 .ai-msg-assistant {
   justify-content: flex-start;
+  align-items: flex-end;
+  gap: 0.5rem;
 }
 
 .ai-bubble {

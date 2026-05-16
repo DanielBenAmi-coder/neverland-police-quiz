@@ -13,6 +13,28 @@
 
   const $ = (sel) => document.querySelector(sel);
 
+  function getAvatarSrc() {
+    return (window.AI_CONFIG && window.AI_CONFIG.avatar) || "assets/rasputin.png";
+  }
+
+  function rasputinAvatarHtml(sizeClass) {
+    const name = (window.AI_CONFIG && window.AI_CONFIG.name) || "רספוטין";
+    return (
+      '<img src="' +
+      escapeHtml(getAvatarSrc()) +
+      '" alt="' +
+      escapeHtml(name) +
+      '" class="rasputin-avatar ' +
+      sizeClass +
+      '" width="40" height="40" />'
+    );
+  }
+
+  const WELCOME_TEXT =
+    "מווו! אני **רספוטין** — שור הנהלים של משטרת נברלנד.\n\n" +
+    "שאלו אותי על נהלים, סיור, מעצרים, קשר, מרדפים ועוד. אחפש לכם תשובות **במאגר השאלות** של האתר.\n\n" +
+    "אפשר גם להפעיל **OpenAI** בהגדרות לניסוח חכם יותר (מפתח אישי, רק בדפדפן שלכם).";
+
   function getConfig() {
     const base = window.AI_CONFIG || {};
     return {
@@ -169,10 +191,10 @@
     const context = buildContextBlock(chunks);
 
     const system = [
-      "אתה יועץ נהלים למשטרת נברלנד (FiveM RP).",
+      "אתה רספוטין — יועץ הנהלים של משטרת נברלנד (FiveM RP), דמות הומוריסטית אך מקצועית.",
       "ענה רק על סמך קטעי המאגר שמופיעים בהודעת המשתמש.",
       "אם המידע לא מופיע במאגר — אמור במפורש שאין מידע במאגר ואל תמציא נהלים.",
-      "ענה בעברית, ברור ומקצועי, בנקודות קצרות כשמתאים.",
+      "ענה בעברית, ברור, בנקודות קצרות. אפשר נגיעה קלילה (מווו / שור) אבל בלי להגזים.",
       "אל תציין מספרי סעיפים שלא קיימים בקטעים.",
     ].join(" ");
 
@@ -246,7 +268,9 @@
       const div = document.createElement("div");
       div.className = "ai-msg ai-msg-" + msg.role;
       if (msg.role === "assistant") {
-        div.innerHTML =
+        const body = document.createElement("div");
+        body.className = "ai-msg-body";
+        body.innerHTML =
           '<div class="ai-bubble">' + renderMarkdownLite(msg.text) + "</div>";
         if (msg.sources && msg.sources.length) {
           const src = document.createElement("div");
@@ -256,8 +280,10 @@
             msg.sources
               .map((s) => `<span class="ai-src-chip">${escapeHtml(s.category)}</span>`)
               .join("");
-          div.appendChild(src);
+          body.appendChild(src);
         }
+        div.innerHTML = rasputinAvatarHtml("rasputin-avatar-sm");
+        div.appendChild(body);
       } else {
         div.innerHTML =
           '<div class="ai-bubble">' + escapeHtml(msg.text) + "</div>";
@@ -289,7 +315,7 @@
     renderMessages(chatMessages);
     $("#ai-input").value = "";
 
-    const loading = { role: "assistant", text: "מחפש במאגר הנהלים…", loading: true };
+    const loading = { role: "assistant", text: "רספוטין מחפש בנהלים…", loading: true };
     chatMessages.push(loading);
     renderMessages(chatMessages);
 
@@ -365,10 +391,7 @@
     if (!chatMessages.length) {
       chatMessages.push({
         role: "assistant",
-        text:
-          "שלום! אני **יועץ הנהלים** של משטרת נברלנד.\n\n" +
-          "שאלו אותי על נהלים, סיור, מעצרים, קשר, מרדפים ועוד — אחפש תשובות **במאגר השאלות** של האתר.\n\n" +
-          "אפשר להפעיל גם **OpenAI** בהגדרות (מפתח אישי, נשמר רק בדפדפן שלכם).",
+        text: WELCOME_TEXT,
         sources: [],
       });
     }
@@ -416,7 +439,7 @@
         {
           role: "assistant",
           text:
-            "השיחה נמחקה. שאלו שוב על נהלים, סיור, מעצרים או כל נושא מהמאגר.",
+            "מווו… השיחה נמחקה. שאלו את רספוטין שוב על נהלים, סיור, מעצרים או כל נושא מהמאגר.",
           sources: [],
         },
       ];
