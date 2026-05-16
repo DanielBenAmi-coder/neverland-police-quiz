@@ -19,6 +19,7 @@
     home: $("#screen-home"),
     quiz: $("#screen-quiz"),
     results: $("#screen-results"),
+    assistant: $("#screen-assistant"),
   };
 
   let state = {
@@ -561,6 +562,11 @@
           document.querySelector(".mode-grid").classList.add("hidden");
           return;
         }
+        if (mode === "assistant") {
+          hidePanels();
+          showScreen("assistant");
+          return;
+        }
       });
     });
 
@@ -595,6 +601,11 @@
     });
 
     $("#btn-home").addEventListener("click", () => showScreen("home"));
+    $("#btn-assistant-home").addEventListener("click", () => showScreen("home"));
+
+    if (window.NeverlandAI) {
+      window.NeverlandAI.init();
+    }
     $("#btn-retry").addEventListener("click", () => {
       startQuiz(state.mode, state.category, state.rankLevel);
     });

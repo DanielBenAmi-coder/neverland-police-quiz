@@ -43,6 +43,13 @@
           <h3>לפי נושא</h3>
           <p>25 שאלות לנושא · סוגים מעורבים</p>
         </button>
+        <button type="button" class="mode-card mode-card-ai" data-mode="assistant">
+          <span class="mode-icon mode-icon-rasputin">
+            <img src="assets/rasputin.png" alt="" width="52" height="52" />
+          </span>
+          <h3>שאל את רספוטין</h3>
+          <p>יועץ הנהלים · מבוסס מאגר השאלות</p>
+        </button>
       </div>
 
       <div class="stats-bar" id="stats-bar">
@@ -108,6 +115,59 @@
       </div>
     </section>
 
+    <section id="screen-assistant" class="screen">
+      <div class="assistant-header">
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-assistant-home">חזרה</button>
+        <div class="assistant-title-wrap">
+          <h2>יועץ נהלים AI</h2>
+          <span class="ai-mode-badge ai-mode-local" id="ai-mode-badge">מצב מאגר</span>
+        </div>
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-ai-settings">הגדרות</button>
+      </div>
+
+      <div class="ai-settings-panel hidden" id="ai-settings-panel">
+        <p class="ai-settings-note">
+          ברירת מחדל: חיפוש חכם במאגר השאלות (ללא עלות, עובד תמיד). OpenAI אופציונלי — מפתח נשמר רק בדפדפן; אם הדפדפן חוסם את הבקשה, התשובה תגיע אוטומטית מהמאגר.
+        </p>
+        <label class="ai-label">
+          <input type="checkbox" id="ai-use-llm" />
+          שימוש ב-OpenAI לניסוח תשובה (דורש מפתח)
+        </label>
+        <label class="ai-label" for="ai-api-key">מפתח OpenAI API</label>
+        <input
+          type="password"
+          id="ai-api-key"
+          class="ai-input-field"
+          placeholder="sk-..."
+          autocomplete="off"
+        />
+        <div class="ai-settings-actions">
+          <button type="button" class="btn btn-primary btn-sm" id="btn-ai-save-settings">שמירה</button>
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-ai-clear-chat">ניקוי שיחה</button>
+        </div>
+      </div>
+
+      <div class="assistant-chat">
+        <div class="ai-messages" id="ai-messages" role="log" aria-live="polite"></div>
+        <div class="ai-suggestions" id="ai-suggestions">
+          <button type="button" class="ai-suggest-chip" data-q="כמה שוטרים יוצאים לסיור?">סיור בזוגות</button>
+          <button type="button" class="ai-suggest-chip" data-q="מה מותר ואסור במעצר?">מעצרים</button>
+          <button type="button" class="ai-suggest-chip" data-q="פירמידת כוח — מתי מותר ירי?">פירמידת כוח</button>
+          <button type="button" class="ai-suggest-chip" data-q="כללי קשר משטרתי וקודים">קשר משטרתי</button>
+          <button type="button" class="ai-suggest-chip" data-q="מה עושים במרדף?">מרדפים</button>
+        </div>
+        <form class="ai-form" id="ai-form">
+          <textarea
+            id="ai-input"
+            rows="2"
+            placeholder="שאלו על נהלים, משמרת, מדים, תחנה..."
+            aria-label="שאלה ליועץ הנהלים"
+          ></textarea>
+          <button type="submit" class="btn btn-primary ai-send" id="ai-send">שלח</button>
+        </form>
+      </div>
+    </section>
+
     <section id="screen-results" class="screen">
       <div class="results-card">
         <div class="score-ring" id="score-ring">
@@ -135,6 +195,8 @@
   <script src="js/questions.js"></script>
   <script src="js/questions-extra.js"></script>
   <script src="js/question-levels.js"></script>
+  <script src="js/ai-config.js"></script>
+  <script src="js/ai-assistant.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
