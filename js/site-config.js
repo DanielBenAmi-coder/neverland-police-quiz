@@ -14,6 +14,9 @@
     apiBase = "";
   }
 
+  // GitHub Pages: הגדירו כתובת Vercel ל-API (רספוטין AI, לוגים)
+  // apiBase = "https://your-project.vercel.app";
+
   window.SITE_CONFIG = {
     adminCode: "Rasputin",
     supabaseUrl: "",

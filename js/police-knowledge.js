@@ -485,12 +485,29 @@
     return parts.join("\n");
   }
 
+  function procedureToText(p) {
+    const parts = [`[${p.category}] ${p.title}: ${p.summary}`];
+    if (p.bullets?.length) p.bullets.forEach((b) => parts.push("- " + b));
+    return parts.join("\n");
+  }
+
+  /** הקשר למודל AI — עד 3 נהלים רלוונטיים */
+  function getContextForQuery(query, ctx) {
+    const result = search(query, ctx);
+    if (result.type !== "hit") return "";
+
+    const list = [result.procedure, ...(result.related || [])].slice(0, 3);
+    return list.map(procedureToText).join("\n\n");
+  }
+
   window.PoliceKnowledge = {
     NOT_FOUND,
     procedures,
     GLOBAL_SYNONYMS,
     search,
     formatAnswer,
+    getContextForQuery,
+    procedureToText,
     getCategories() {
       return [...new Set(procedures.map((p) => p.category))];
     },

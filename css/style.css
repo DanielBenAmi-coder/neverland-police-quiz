@@ -1089,6 +1089,21 @@ body.gate-open {
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 20px var(--blue-glow);
 }
 
+.rasputin-fab-loading {
+  pointer-events: none;
+  animation: rasputin-fab-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes rasputin-fab-pulse {
+  0%,
+  100% {
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5), 0 0 0 0 rgba(201, 162, 39, 0.4);
+  }
+  50% {
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5), 0 0 0 8px rgba(201, 162, 39, 0);
+  }
+}
+
 .rasputin-fab-img {
   width: 36px;
   height: 36px;
@@ -1198,6 +1213,22 @@ body.gate-open {
   color: var(--text);
 }
 
+.rasputin-clear {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.2rem 0.45rem;
+  border-radius: 6px;
+}
+
+.rasputin-clear:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
 .rasputin-suggestions {
   display: flex;
   flex-wrap: wrap;
@@ -1267,24 +1298,47 @@ body.gate-open {
 
 .rasputin-typing .rasputin-msg-bubble {
   display: flex;
-  gap: 4px;
-  padding: 0.7rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  padding: 0.7rem 0.85rem;
 }
 
-.rasputin-typing span {
+.rasputin-dots {
+  display: flex;
+  gap: 4px;
+}
+
+.rasputin-dots span {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--muted);
+  background: var(--gold);
   animation: rasputin-dot 1s infinite ease-in-out;
 }
 
-.rasputin-typing span:nth-child(2) {
+.rasputin-dots span:nth-child(2) {
   animation-delay: 0.15s;
 }
 
-.rasputin-typing span:nth-child(3) {
+.rasputin-dots span:nth-child(3) {
   animation-delay: 0.3s;
+}
+
+.rasputin-thinking {
+  font-size: 0.72rem;
+  color: var(--muted);
+  animation: rasputin-think-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes rasputin-think-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 @keyframes rasputin-dot {
