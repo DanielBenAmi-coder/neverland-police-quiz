@@ -1,6 +1,6 @@
 const { handleOptions, jsonResponse } = require("./_lib/cors");
 
-const MODEL = "gpt-4.1-mini";
+const MODELS = ["gpt-4.1-mini", "gpt-4o-mini"];
 const MAX_HISTORY = 20;
 const MAX_MSG_LEN = 600;
 const MAX_CONTEXT_LEN = 4000;
@@ -37,39 +37,74 @@ function sanitizeHistory(raw) {
 async function callOpenAI(messages) {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    throw new Error("OPENAI_API_KEY not configured");
+    const err = new Error("OPENAI_API_KEY not configured");
+    err.code = "NO_KEY";
+    throw err;
   }
 
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      messages,
-      temperature: 0.35,
-      max_tokens: 450,
-    }),
-  });
+  let lastError = null;
 
-  const data = await res.json().catch(() => ({}));
+  for (const model of MODELS) {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        temperature: 0.35,
+        max_tokens: 450,
+      }),
+    });
 
-  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+
+    if (res.ok) {
+      const reply = data?.choices?.[0]?.message?.content;
+      if (!reply) {
+        lastError = new Error("Empty response from OpenAI");
+        continue;
+      }
+      return { reply: reply.trim(), model };
+    }
+
     const msg = data?.error?.message || `OpenAI error ${res.status}`;
-    throw new Error(msg);
+    lastError = new Error(msg);
+    lastError.openaiStatus = res.status;
+    lastError.openaiType = data?.error?.type;
+
+    const retryable =
+      res.status === 404 ||
+      /model/i.test(msg) ||
+      /does not exist/i.test(msg) ||
+      /not found/i.test(msg);
+    if (!retryable) break;
   }
 
-  const reply = data?.choices?.[0]?.message?.content;
-  if (!reply) throw new Error("Empty response from OpenAI");
-  return reply.trim();
+  throw lastError || new Error("OpenAI request failed");
 }
 
 module.exports = async function handler(req, res) {
   const origin = req.headers.origin || "";
 
   if (req.method === "OPTIONS") return handleOptions(req, res);
+
+  if (req.method === "GET") {
+    return jsonResponse(
+      res,
+      200,
+      {
+        ok: true,
+        service: "rasputin",
+        hasOpenAiKey: Boolean(process.env.OPENAI_API_KEY),
+        models: MODELS,
+      },
+      origin
+    );
+  }
+
   if (req.method !== "POST") {
     return jsonResponse(res, 405, { error: "Method not allowed" }, origin);
   }
@@ -99,15 +134,34 @@ module.exports = async function handler(req, res) {
   const messages = [{ role: "system", content: systemParts.join("") }, ...history, { role: "user", content: message }];
 
   try {
-    const reply = await callOpenAI(messages);
-    return jsonResponse(res, 200, { ok: true, reply, model: MODEL }, origin);
+    const result = await callOpenAI(messages);
+    return jsonResponse(res, 200, { ok: true, reply: result.reply, model: result.model }, origin);
   } catch (err) {
     console.error("Rasputin API:", err.message);
-    const status = err.message.includes("OPENAI_API_KEY") ? 503 : 500;
+
+    if (err.code === "NO_KEY" || err.message.includes("OPENAI_API_KEY")) {
+      return jsonResponse(
+        res,
+        503,
+        {
+          error: "מפתח OpenAI לא מוגדר ב-Vercel. הוסיפו OPENAI_API_KEY ועשו Redeploy.",
+          code: "NO_KEY",
+        },
+        origin
+      );
+    }
+
+    let userMsg = "שגיאה בעיבוד התשובה. נסו שוב בעוד רגע.";
+    if (/incorrect api key/i.test(err.message) || err.openaiStatus === 401) {
+      userMsg = "מפתח OpenAI לא תקין. בדקו את OPENAI_API_KEY ב-Vercel.";
+    } else if (/quota|billing|insufficient/i.test(err.message)) {
+      userMsg = "אין יתרה/חיוב בחשבון OpenAI. בדקו Billing ב-platform.openai.com.";
+    }
+
     return jsonResponse(
       res,
-      status,
-      { error: "שגיאה בעיבוד התשובה. נסו שוב בעוד רגע." },
+      500,
+      { error: userMsg, code: "OPENAI_ERROR", detail: err.message.slice(0, 200) },
       origin
     );
   }

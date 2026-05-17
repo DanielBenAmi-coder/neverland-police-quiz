@@ -97,7 +97,9 @@
 
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      throw new Error(data.error || "שגיאת שרת (" + res.status + ")");
+      const msg = data.error || "שגיאת שרת (" + res.status + ")";
+      const extra = data.detail ? "\n(" + data.detail + ")" : "";
+      throw new Error(msg + extra);
     }
     return data.reply || "";
   }
