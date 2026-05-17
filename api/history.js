@@ -1,16 +1,6 @@
 const { appendHistory, readHistory } = require("./_lib/redis");
+const { checkAdmin } = require("./_lib/admin");
 const { handleOptions, jsonResponse } = require("./_lib/cors");
-
-const DEFAULT_ADMIN_CODE = "Rasputin";
-
-function getAdminCode() {
-  return process.env.ADMIN_CODE || DEFAULT_ADMIN_CODE;
-}
-
-function checkAdmin(req) {
-  const sent = req.headers["x-admin-code"] || "";
-  return sent === getAdminCode();
-}
 
 function sanitizeName(name) {
   return String(name || "")

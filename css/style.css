@@ -784,6 +784,34 @@ body.gate-open {
   margin-bottom: 0.75rem;
 }
 
+.admin-alert {
+  margin: 0.75rem 0;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: rgba(220, 80, 60, 0.12);
+  border: 1px solid rgba(220, 80, 60, 0.35);
+  color: #f5d0c8;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.admin-alert p {
+  margin: 0.25rem 0;
+}
+
+.admin-select {
+  min-width: 8.5rem;
+}
+
+.admin-toolbar .btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.admin-logs-flat {
+  margin-top: 0.5rem;
+}
+
 .admin-toolbar .admin-input {
   flex: 1;
   min-width: 160px;

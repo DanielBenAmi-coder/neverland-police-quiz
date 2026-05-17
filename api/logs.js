@@ -1,16 +1,6 @@
-const { readLogs } = require("./_lib/redis");
+const { readLogs, isRedisConfigured } = require("./_lib/redis");
+const { checkAdmin } = require("./_lib/admin");
 const { handleOptions, jsonResponse } = require("./_lib/cors");
-
-const DEFAULT_ADMIN_CODE = "Rasputin";
-
-function getAdminCode() {
-  return process.env.ADMIN_CODE || DEFAULT_ADMIN_CODE;
-}
-
-function checkAdmin(req) {
-  const sent = req.headers["x-admin-code"] || "";
-  return sent === getAdminCode();
-}
 
 module.exports = async function handler(req, res) {
   const origin = req.headers.origin || "";
@@ -25,16 +15,23 @@ module.exports = async function handler(req, res) {
   }
 
   const limit = parseInt(req.query?.limit || "300", 10);
+  const redisConfigured = isRedisConfigured();
 
   try {
-    const logs = await readLogs(limit);
-    const names = [...new Set(logs.map((l) => l.name))];
+    const { logs, store } = await readLogs(limit);
+    const names = [...new Set(logs.map((l) => l.name).filter(Boolean))];
+
     return jsonResponse(
       res,
       200,
       {
         ok: true,
         logs,
+        meta: {
+          redisConfigured,
+          store,
+          limit: Math.min(Math.max(limit, 1), 2000),
+        },
         stats: {
           total: logs.length,
           uniqueNames: names.length,
@@ -45,6 +42,14 @@ module.exports = async function handler(req, res) {
     );
   } catch (err) {
     console.error(err);
-    return jsonResponse(res, 500, { error: "שגיאת שרת" }, origin);
+    return jsonResponse(
+      res,
+      500,
+      {
+        error: "שגיאת קריאה מ-Redis",
+        meta: { redisConfigured, store: "error" },
+      },
+      origin
+    );
   }
 };

@@ -3,6 +3,12 @@ const HISTORY_KEY = "np:quiz:history";
 const MAX_LOGS = 2000;
 const MAX_HISTORY = 3000;
 
+function isRedisConfigured() {
+  return Boolean(
+    process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+  );
+}
+
 function getMemLogs() {
   if (!globalThis.__NP_ACTIVITY_LOGS) {
     globalThis.__NP_ACTIVITY_LOGS = [];
@@ -50,12 +56,16 @@ async function appendLog(entry) {
 }
 
 async function readLogs(limit = 300) {
-  const cap = Math.min(Math.max(limit, 1), 500);
+  const cap = Math.min(Math.max(limit, 1), MAX_LOGS);
+
+  if (!isRedisConfigured()) {
+    return { logs: [], store: "none" };
+  }
 
   try {
     const data = await upstash("LRANGE", LOG_KEY, 0, cap - 1);
     if (data && Array.isArray(data.result)) {
-      return data.result
+      const logs = data.result
         .map((line) => {
           try {
             return JSON.parse(line);
@@ -64,12 +74,14 @@ async function readLogs(limit = 300) {
           }
         })
         .filter(Boolean);
+      return { logs, store: "redis" };
     }
   } catch (err) {
     console.error("Redis read failed:", err.message);
+    throw err;
   }
 
-  return getMemLogs().slice(0, cap);
+  return { logs: [], store: "redis" };
 }
 
 function getMemHistory() {
@@ -136,6 +148,7 @@ module.exports = {
   readLogs,
   appendHistory,
   readHistory,
+  isRedisConfigured,
   LOG_KEY,
   HISTORY_KEY,
 };

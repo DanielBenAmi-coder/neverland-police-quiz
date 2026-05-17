@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=16" />
+  <link rel="stylesheet" href="css/style.css?v=17" />
 </head>
 <body>
   <div class="bg-grid" aria-hidden="true"></div>
@@ -183,12 +183,25 @@
       <div id="admin-logs-panel" class="admin-panel hidden">
         <div class="admin-toolbar">
           <input type="search" id="admin-filter-name" class="admin-input" placeholder="סינון לפי שם שוטר..." />
+          <select id="admin-filter-event" class="admin-input admin-select" aria-label="סינון לפי פעולה">
+            <option value="">כל הפעולות</option>
+            <option value="login">כניסה</option>
+            <option value="visit">ביקור</option>
+            <option value="quiz_start">התחלת מבחן</option>
+            <option value="quiz_finish">סיום מבחן</option>
+            <option value="mode_open">פתיחת מצב</option>
+            <option value="quit_quiz">יציאה ממבחן</option>
+          </select>
+          <button type="button" class="btn btn-ghost btn-sm active" id="btn-admin-view-grouped">לפי שוטר</button>
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-admin-view-flat">רשימה</button>
           <button type="button" class="btn btn-ghost btn-sm" id="btn-admin-refresh">רענון</button>
           <button type="button" class="btn btn-ghost btn-sm" id="btn-admin-logout">יציאה</button>
         </div>
+        <div id="admin-alert" class="admin-alert hidden" role="alert"></div>
         <p id="admin-status" class="admin-status"></p>
         <div id="admin-stats" class="admin-stats"></div>
         <div id="admin-logs-grouped" class="admin-logs-grouped"></div>
+        <div id="admin-logs-flat" class="admin-logs-flat hidden"></div>
         <p id="admin-logs-empty" class="admin-empty hidden">אין לוגים להצגה</p>
       </div>
     </section>
@@ -256,18 +269,18 @@
     <button type="button" class="footer-admin-link" id="btn-admin-entry">כניסת מנהל</button>
   </footer>
 
-  <script src="js/site-config.js?v=16"></script>
-  <script src="js/police-intents.js?v=16"></script>
-  <script src="js/police-knowledge.js?v=16"></script>
-  <script src="js/rasputin-bot.js?v=16"></script>
-  <script src="js/logs-store.js?v=16"></script>
-  <script src="js/history-store.js?v=16"></script>
-  <script src="js/tracking.js?v=16"></script>
-  <script src="js/history.js?v=16"></script>
-  <script src="js/admin.js?v=16"></script>
-  <script src="js/questions.js?v=16"></script>
-  <script src="js/questions-extra.js?v=16"></script>
-  <script src="js/question-levels.js?v=16"></script>
-  <script src="js/app.js?v=16"></script>
+  <script src="js/site-config.js?v=17"></script>
+  <script src="js/police-intents.js?v=17"></script>
+  <script src="js/police-knowledge.js?v=17"></script>
+  <script src="js/rasputin-bot.js?v=17"></script>
+  <script src="js/logs-store.js?v=17"></script>
+  <script src="js/history-store.js?v=17"></script>
+  <script src="js/tracking.js?v=17"></script>
+  <script src="js/history.js?v=17"></script>
+  <script src="js/admin.js?v=17"></script>
+  <script src="js/questions.js?v=17"></script>
+  <script src="js/questions-extra.js?v=17"></script>
+  <script src="js/question-levels.js?v=17"></script>
+  <script src="js/app.js?v=17"></script>
 </body>
 </html>

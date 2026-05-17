@@ -3,6 +3,9 @@
 
   const ADMIN_CODE_KEY = "np_admin_code";
   let cachedLogs = [];
+  let cachedMeta = {};
+  let cachedErrors = [];
+  let viewMode = "grouped";
 
   const EVENT_LABELS = {
     login: "כניסה",
@@ -27,7 +30,15 @@
   }
 
   function setAdminCode(code) {
-    sessionStorage.setItem(ADMIN_CODE_KEY, code);
+    sessionStorage.setItem(ADMIN_CODE_KEY, code.trim());
+  }
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
   }
 
   function formatTime(iso) {
@@ -48,14 +59,31 @@
   function detailText(log) {
     const parts = [];
     if (log.label) parts.push(log.label);
-    if (log.mode) parts.push(`מצב: ${log.mode}`);
-    if (log.rank) parts.push(`דרגה: ${log.rank}`);
-    if (log.category) parts.push(`נושא: ${log.category}`);
-    if (log.score != null) parts.push(`ציון: ${log.score}%`);
+    if (log.mode) parts.push("מצב: " + log.mode);
+    if (log.rank) parts.push("דרגה: " + log.rank);
+    if (log.category) parts.push("נושא: " + log.category);
+    if (log.score != null) parts.push("ציון: " + log.score + "%");
     if (log.passed === true) parts.push("עבר");
     if (log.passed === false) parts.push("לא עבר");
-    if (log.questions) parts.push(`${log.questions} שאלות`);
+    if (log.questions) parts.push(log.questions + " שאלות");
     return parts.join(" · ") || "—";
+  }
+
+  function getFilters() {
+    const nameQ = (document.getElementById("admin-filter-name")?.value || "")
+      .trim()
+      .toLowerCase();
+    const eventQ = document.getElementById("admin-filter-event")?.value || "";
+    return { nameQ, eventQ };
+  }
+
+  function filterLogs(logs) {
+    const { nameQ, eventQ } = getFilters();
+    return logs.filter((l) => {
+      if (nameQ && !(l.name || "").toLowerCase().includes(nameQ)) return false;
+      if (eventQ && l.event !== eventQ) return false;
+      return true;
+    });
   }
 
   function groupByName(logs) {
@@ -83,11 +111,59 @@
         ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
         : null;
 
-    let line = `${items.length} פעולות`;
-    if (quizzes.length) line += ` · ${quizzes.length} מבחנים/תרגולים`;
-    if (avg != null) line += ` · ממוצע ${avg}%`;
-    if (last?.ts) line += ` · אחרון: ${formatTime(last.ts)}`;
+    let line = items.length + " פעולות";
+    if (quizzes.length) line += " · " + quizzes.length + " מבחנים/תרגולים";
+    if (avg != null) line += " · ממוצע " + avg + "%";
+    if (last && last.ts) line += " · אחרון: " + formatTime(last.ts);
     return line;
+  }
+
+  function hasApi() {
+    return window.NeverlandLogs?.hasApi?.() ?? false;
+  }
+
+  function hasSupabase() {
+    return window.NeverlandLogs?.hasSupabase?.() ?? false;
+  }
+
+  function renderAlert() {
+    const el = document.getElementById("admin-alert");
+    if (!el) return;
+
+    const msgs = [];
+
+    cachedErrors.forEach((e) => {
+      if (e.code === "AUTH") {
+        msgs.push(
+          "קוד מנהל נדחה על ידי השרת — ודאו ש-ADMIN_CODE ב-Vercel תואם (ברירת מחדל: Rasputin)."
+        );
+      } else if (e.code === "NETWORK") {
+        msgs.push("לא ניתן להתחבר ל-API: " + (e.message || ""));
+      } else {
+        msgs.push((e.source || "שגיאה") + ": " + (e.message || ""));
+      }
+    });
+
+    if (hasApi() && cachedMeta.redisConfigured === false) {
+      msgs.push(
+        "Redis (Upstash) לא מוגדר ב-Vercel — לוגים לא נשמרים לכל השוטרים. הוסיפו UPSTASH_REDIS_REST_URL ו-UPSTASH_REDIS_REST_TOKEN."
+      );
+    }
+
+    if (!hasApi() && !hasSupabase()) {
+      msgs.push(
+        "אין חיבור לשרת לוגים — הגדירו Supabase ב-site-config או פרסמו דרך GitHub Pages עם apiBase."
+      );
+    }
+
+    if (msgs.length === 0) {
+      el.classList.add("hidden");
+      el.innerHTML = "";
+      return;
+    }
+
+    el.classList.remove("hidden");
+    el.innerHTML = msgs.map((m) => "<p>" + escapeHtml(m) + "</p>").join("");
   }
 
   function renderStats(logs) {
@@ -103,68 +179,109 @@
         return false;
       }
     }).length;
+    const quizzes = logs.filter((l) => l.event === "quiz_finish").length;
 
-    el.innerHTML = `
-      <div class="admin-stat-card"><span class="num">${names.size}</span><span class="lbl">שוטרים</span></div>
-      <div class="admin-stat-card"><span class="num">${logs.length}</span><span class="lbl">אירועים</span></div>
-      <div class="admin-stat-card"><span class="num">${todayCount}</span><span class="lbl">היום</span></div>
-    `;
+    el.innerHTML =
+      '<div class="admin-stat-card"><span class="num">' +
+      names.size +
+      '</span><span class="lbl">שוטרים</span></div>' +
+      '<div class="admin-stat-card"><span class="num">' +
+      logs.length +
+      '</span><span class="lbl">אירועים</span></div>' +
+      '<div class="admin-stat-card"><span class="num">' +
+      todayCount +
+      '</span><span class="lbl">היום</span></div>' +
+      '<div class="admin-stat-card"><span class="num">' +
+      quizzes +
+      '</span><span class="lbl">סיומי מבחן</span></div>';
   }
 
-  function renderGroupedLogs(logs, filterName) {
+  function renderGrouped(logs) {
     const container = document.getElementById("admin-logs-grouped");
-    const empty = document.getElementById("admin-logs-empty");
-    if (!container) return;
+    const flat = document.getElementById("admin-logs-flat");
+    if (!container || !flat) return;
 
-    const q = (filterName || "").trim().toLowerCase();
-    const filtered = q
-      ? logs.filter((l) => (l.name || "").toLowerCase().includes(q))
-      : logs;
-
-    const groups = groupByName(filtered);
+    container.classList.remove("hidden");
+    flat.classList.add("hidden");
     container.innerHTML = "";
 
-    if (groups.length === 0) {
-      if (empty) empty.classList.remove("hidden");
-      return;
-    }
-    if (empty) empty.classList.add("hidden");
-
-    groups.forEach((group) => {
-      const card = document.createElement("article");
-      card.className = "admin-officer-card";
-
+    groupByName(logs).forEach((group) => {
       const rows = group.items
-        .map(
-          (log) => `
-        <tr>
-          <td>${formatTime(log.ts)}</td>
-          <td>${eventLabel(log.event)}</td>
-          <td>${detailText(log)}</td>
-        </tr>`
-        )
+        .map(function (log) {
+          return (
+            "<tr><td>" +
+            formatTime(log.ts) +
+            "</td><td>" +
+            escapeHtml(eventLabel(log.event)) +
+            "</td><td>" +
+            escapeHtml(detailText(log)) +
+            "</td></tr>"
+          );
+        })
         .join("");
 
-      card.innerHTML = `
-        <header class="admin-officer-head">
-          <h3>${group.name}</h3>
-          <p>${officerSummary(group.items)}</p>
-        </header>
-        <div class="admin-table-wrap">
-          <table class="admin-table admin-table-nested">
-            <thead>
-              <tr>
-                <th>זמן</th>
-                <th>פעולה</th>
-                <th>פרטים</th>
-              </tr>
-            </thead>
-            <tbody>${rows}</tbody>
-          </table>
-        </div>
-      `;
+      const card = document.createElement("article");
+      card.className = "admin-officer-card";
+      card.innerHTML =
+        '<header class="admin-officer-head"><h3>' +
+        escapeHtml(group.name) +
+        "</h3><p>" +
+        escapeHtml(officerSummary(group.items)) +
+        '</p></header><div class="admin-table-wrap"><table class="admin-table admin-table-nested"><thead><tr><th>זמן</th><th>פעולה</th><th>פרטים</th></tr></thead><tbody>' +
+        rows +
+        "</tbody></table></div>";
       container.appendChild(card);
     });
+  }
+
+  function renderFlat(logs) {
+    const container = document.getElementById("admin-logs-grouped");
+    const flat = document.getElementById("admin-logs-flat");
+    if (!container || !flat) return;
+
+    container.classList.add("hidden");
+    flat.classList.remove("hidden");
+
+    const rows = logs
+      .map(function (log) {
+        return (
+          "<tr><td>" +
+          formatTime(log.ts) +
+          "</td><td>" +
+          escapeHtml(log.name || "—") +
+          "</td><td>" +
+          escapeHtml(eventLabel(log.event)) +
+          "</td><td>" +
+          escapeHtml(detailText(log)) +
+          "</td></tr>"
+        );
+      })
+      .join("");
+
+    flat.innerHTML =
+      '<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>זמן</th><th>שוטר</th><th>פעולה</th><th>פרטים</th></tr></thead><tbody>' +
+      rows +
+      "</tbody></table></div>";
+  }
+
+  function renderLogsView(logs) {
+    const empty = document.getElementById("admin-logs-empty");
+    if (logs.length === 0) {
+      document.getElementById("admin-logs-grouped")?.classList.add("hidden");
+      document.getElementById("admin-logs-flat")?.classList.add("hidden");
+      empty?.classList.remove("hidden");
+      return;
+    }
+    empty?.classList.add("hidden");
+    if (viewMode === "flat") renderFlat(logs);
+    else renderGrouped(logs);
+  }
+
+  function renderAll() {
+    const filtered = filterLogs(cachedLogs);
+    renderAlert();
+    renderStats(filtered);
+    renderLogsView(filtered);
   }
 
   async function loadLogs() {
@@ -174,24 +291,46 @@
 
     if (status) status.textContent = "טוען לוגים...";
 
-    cachedLogs = await window.NeverlandLogs.fetchForAdmin(code, 500);
+    try {
+      const result = await window.NeverlandLogs.fetchForAdmin(code, 800);
+      cachedLogs = result.logs || [];
+      cachedMeta = result.meta || {};
+      cachedErrors = result.errors || [];
+    } catch (err) {
+      cachedLogs = [];
+      cachedErrors = [{ code: "NETWORK", message: err.message }];
+    }
 
-    renderStats(cachedLogs);
-    const filter = document.getElementById("admin-filter-name")?.value || "";
-    renderGroupedLogs(cachedLogs, filter);
+    renderAll();
 
-    const hasCloud = window.NeverlandLogs?.hasCloud?.();
-    const names = new Set(cachedLogs.map((l) => l.name)).size;
+    const statusEl = document.getElementById("admin-status");
+    if (!statusEl) return;
 
-    if (status) {
-      if (hasCloud) {
-        status.textContent = `לוגים מ-${names} שוטרים · סה"כ ${cachedLogs.length} אירועים (שרת משותף)`;
-      } else if (cachedLogs.length > 0) {
-        status.textContent = `נמצאו ${cachedLogs.length} אירועים מהשרת.`;
-      } else {
-        status.textContent =
-          "אין לוגים בשרת. ודאו ש-UPSTASH_REDIS (Vercel) או Supabase מוגדרים — לוגים מקומיים לא מוצגים כאן.";
-      }
+    const names = new Set(cachedLogs.map((l) => l.name).filter(Boolean)).size;
+    const sources = (cachedMeta.sources || []).join(", ") || "—";
+    const redisOk =
+      cachedMeta.redisConfigured === true ? "Redis מחובר" : "Redis לא מוגדר";
+    const time = new Date().toLocaleTimeString("he-IL", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    if (cachedErrors.some((e) => e.code === "AUTH")) {
+      statusEl.textContent = "קוד מנהל נדחה על ידי השרת — התחברו מחדש.";
+    } else if (cachedLogs.length === 0) {
+      statusEl.textContent =
+        "אין לוגים · " + redisOk + " · מקורות: " + sources + " · עודכן " + time;
+    } else {
+      statusEl.textContent =
+        names +
+        ' שוטרים · ' +
+        cachedLogs.length +
+        " אירועים · " +
+        redisOk +
+        " · " +
+        sources +
+        " · עודכן " +
+        time;
     }
   }
 
@@ -233,10 +372,21 @@
 
       if (!isValidAdminCode(code)) {
         if (err) {
-          err.textContent = "קוד מנהל שגוי (נסו: Rasputin)";
+          err.textContent = "קוד מנהל שגוי (ברירת מחדל: Rasputin)";
           err.classList.remove("hidden");
         }
         return;
+      }
+
+      if (window.NeverlandLogs?.verifyAdminCode) {
+        const verify = await window.NeverlandLogs.verifyAdminCode(code);
+        if (!verify.ok) {
+          if (err) {
+            err.textContent = verify.error || "השרת דחה את הקוד";
+            err.classList.remove("hidden");
+          }
+          return;
+        }
       }
 
       setAdminCode(code);
@@ -250,13 +400,27 @@
       showLogin();
     });
 
-    document.getElementById("admin-filter-name")?.addEventListener("input", (e) => {
-      renderGroupedLogs(cachedLogs, e.target.value || "");
+    document.getElementById("admin-filter-name")?.addEventListener("input", renderAll);
+    document.getElementById("admin-filter-event")?.addEventListener("change", renderAll);
+
+    document.getElementById("btn-admin-view-grouped")?.addEventListener("click", () => {
+      viewMode = "grouped";
+      document.getElementById("btn-admin-view-grouped")?.classList.add("active");
+      document.getElementById("btn-admin-view-flat")?.classList.remove("active");
+      renderAll();
+    });
+
+    document.getElementById("btn-admin-view-flat")?.addEventListener("click", () => {
+      viewMode = "flat";
+      document.getElementById("btn-admin-view-flat")?.classList.add("active");
+      document.getElementById("btn-admin-view-grouped")?.classList.remove("active");
+      renderAll();
     });
   }
 
   function init() {
     bind();
+    document.getElementById("btn-admin-view-grouped")?.classList.add("active");
     if (getAdminCode() && location.hash === "#admin") {
       showAdminScreen();
       showLogsPanel();

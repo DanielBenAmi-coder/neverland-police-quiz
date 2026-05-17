@@ -1,4 +1,4 @@
-const { appendLog } = require("./_lib/redis");
+const { appendLog, isRedisConfigured } = require("./_lib/redis");
 const { handleOptions, jsonResponse } = require("./_lib/cors");
 
 function sanitizeName(name) {
@@ -49,7 +49,25 @@ module.exports = async function handler(req, res) {
 
   try {
     const result = await appendLog(entry);
-    return jsonResponse(res, 200, { ok: true, entry, store: result.store }, origin);
+    const redisConfigured = isRedisConfigured();
+    return jsonResponse(
+      res,
+      200,
+      {
+        ok: true,
+        entry,
+        store: result.store,
+        meta: {
+          redisConfigured,
+          persisted: result.store === "redis",
+        },
+        warning:
+          !redisConfigured && result.store === "memory"
+            ? "Redis לא מוגדר ב-Vercel — הלוג לא יישמר ללוח מנהל. הוסיפו UPSTASH_REDIS_*."
+            : null,
+      },
+      origin
+    );
   } catch (err) {
     console.error(err);
     return jsonResponse(res, 500, { error: "שגיאת שרת" }, origin);
