@@ -8,10 +8,28 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=18" />
+  <link rel="stylesheet" href="css/style.css?v=19" />
 </head>
 <body>
   <div class="bg-grid" aria-hidden="true"></div>
+
+  <aside
+    id="upgrade-toast"
+    class="upgrade-toast hidden"
+    role="status"
+    aria-live="polite"
+    aria-label="הודעת שדרוג"
+  >
+    <button type="button" class="upgrade-toast-close" id="upgrade-toast-close" aria-label="סגירה">×</button>
+    <p class="upgrade-toast-badge">שדרוג</p>
+    <h2 class="upgrade-toast-title">מה חדש באתר</h2>
+    <ul class="upgrade-toast-list">
+      <li><strong>לוגים</strong> — מעקב פעילות שוטרים (מנהלים)</li>
+      <li><strong>רספוטין AI</strong> — שאלו על נהלים בצ'אט</li>
+      <li><strong>היסטוריה</strong> — מגמות וטעויות מהבחינות שלכם</li>
+      <li><strong>שאלות חדשות</strong> — עדכון נהלי מרדף ועוד</li>
+    </ul>
+  </aside>
 
   <header class="site-header">
     <div class="badge" aria-hidden="true">NP</div>
@@ -269,19 +287,20 @@
     <button type="button" class="footer-admin-link" id="btn-admin-entry">כניסת מנהל</button>
   </footer>
 
-  <script src="js/site-config.js?v=18"></script>
-  <script src="js/police-intents.js?v=18"></script>
-  <script src="js/police-knowledge.js?v=18"></script>
-  <script src="js/rasputin-bot.js?v=18"></script>
-  <script src="js/logs-store.js?v=18"></script>
-  <script src="js/discord-log.js?v=18"></script>
-  <script src="js/history-store.js?v=18"></script>
-  <script src="js/tracking.js?v=18"></script>
-  <script src="js/history.js?v=18"></script>
-  <script src="js/admin.js?v=18"></script>
-  <script src="js/questions.js?v=18"></script>
-  <script src="js/questions-extra.js?v=18"></script>
-  <script src="js/question-levels.js?v=18"></script>
-  <script src="js/app.js?v=18"></script>
+  <script src="js/site-config.js?v=19"></script>
+  <script src="js/upgrade-banner.js?v=19"></script>
+  <script src="js/police-intents.js?v=19"></script>
+  <script src="js/police-knowledge.js?v=19"></script>
+  <script src="js/rasputin-bot.js?v=19"></script>
+  <script src="js/logs-store.js?v=19"></script>
+  <script src="js/discord-log.js?v=19"></script>
+  <script src="js/history-store.js?v=19"></script>
+  <script src="js/tracking.js?v=19"></script>
+  <script src="js/history.js?v=19"></script>
+  <script src="js/admin.js?v=19"></script>
+  <script src="js/questions.js?v=19"></script>
+  <script src="js/questions-extra.js?v=19"></script>
+  <script src="js/question-levels.js?v=19"></script>
+  <script src="js/app.js?v=19"></script>
 </body>
 </html>
