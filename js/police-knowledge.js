@@ -12,6 +12,8 @@
   const GLOBAL_SYNONYMS = {
     מרדף: ["בריחה", "רכב נמלט", "נמלט", "מרדפים", "pursuit", "10-80", "רדיפה", "החלפת רכב"],
     "ירי על רכב": ["לירות על הרכב", "ירי על גלגלים", "גלגלים", "פנצ'ר", "לירות לגלגלים"],
+    לבד: ["בלי שותף", "לבד בניידת", "נשארתי", "אין גיבוי", "בלי גיבוי", "solo"],
+    תגבורת: ["גיבוי", "backup", "10-78", "עזרה", "כוחות נוספים"],
     מעצר: ["עצור", "לעצור", "אזיקים", "arrest", "עצירה", "לכוד"],
     רדיו: ["קשר", "תדר", "radio", "10-", "קוד", "מיקרופון", "תגבורת"],
     ירי: ["אש", "נשק חם", "אקדח", "יריות", "shoot", "fire"],
@@ -88,12 +90,10 @@
       title: "קודי רדיו נפוצים",
       summary: "קודים עיקריים בתקשורת משטרתית:",
       bullets: [
-        "10-7 — יורד מתפקיד.",
-        "10-78 — זקוק לתגבורת.",
-        "10-80 — מרדף פעיל.",
-        "10-31 — פשע מתבצע.",
-        "10-50 — תאונה.",
-        "קוד 5 — עצירת תנועה בסיכון גבוה (מבוקש).",
+        "10-4 מאשר | 10-6 עסוק | 10-7 יורד מתפקיד | 10-8 עולה מתפקיד.",
+        "10-78 תגבורת | 10-80 מרדף | 10-31 פשע | 10-38 עצירה שגרתית.",
+        "10-50 תאונה | 10-70 מרדף רגלי | 10-99 מבוקש → קוד 5 סטופ בסיכון.",
+        "קוד 5 — עצירת תנועה בסיכון גבוה (שונה מ-10-38).",
       ],
       keywords: ["10-7", "10-78", "10-80", "10-31", "10-50", "קוד 5", "רדיו", "קשר"],
       synonyms: ["תדר", "קודים", "radio code"],
@@ -324,10 +324,148 @@
       title: "תגובה לקריאות ותגבורת",
       summary:
         "בכל אירוע חריג — דווחו מיד בתדר עם זיהוי, מיקום וסוג אירוע. בקשת תגבורת: 10-78.",
+      bullets: [
+        "תחילת דיווח: שם + תג → מיקום → מה קורה → בקשה (תגבורת/מרדף וכו').",
+        "דוגמה: \"גד כהן תג 204, מרדף אחרי ניסאן צהוב, כביש לכיוון בית הכלא, מבקש תגבורת\".",
+      ],
       keywords: ["דיספאץ", "תגבורת", "קריאה", "מוקד", "פיקוד"],
       synonyms: ["dispatch", "backup", "תגבור"],
     },
+    {
+      id: "panic-kidnap",
+      category: "חירום",
+      title: "נוהל חטיפת שוטר (עורב) ולחצן מצוקה",
+      summary:
+        "מנעו חטיפה: תגבורת ומרחק. אם אין בריחה ואיום מיידי — שיתוף פעולה זמני לשמירת חיים. שבי ללא מוצא — PANIC מיד.",
+      bullets: [
+        "PANIC רק בחירום אמיתי (שבי/חטיפה) — שימוש ללא סיבה עלול להוביל לפיטורים.",
+        "לאחר PANIC — כל הכוחות מתפרסים לאיתור.",
+      ],
+      keywords: ["חטיפה", "עורב", "panic", "מצוקה", "שבוי"],
+      synonyms: ["לחצן", "נחטף"],
+    },
+    {
+      id: "arrest-procedure",
+      category: "מעצרים",
+      title: "ביצוע מעצר בשטח",
+      summary: "במעצר: כיוון נשק, ידיים למעלה, גב לרכב/אובייקט, אזיקה, הסבר סיבה.",
+      bullets: [
+        "מירנדה רק אם תחקירו — לא בכל מעצר (למשל שוד ללא חקירה).",
+        "אי הקראת זכויות כשצריך — עלול לשחרר את העצור ולפגוע בתיק.",
+      ],
+      keywords: ["מעצר", "אזיקה", "ידיים", "מירנדה"],
+      synonyms: ["לעצור", "עצירה"],
+    },
+    {
+      id: "wanted-code5",
+      category: "בדיקות תנועה",
+      title: "מבוקש וקוד 5",
+      summary:
+        "מבוקש בקשר → קוד 5 (עצירת תנועה בסיכון גבוה), שונה מעצירה שגרתית 10-38.",
+      keywords: ["מבוקש", "קוד 5", "10-99", "סטופ"],
+      synonyms: ["wanted", "high risk stop"],
+    },
+    {
+      id: "pursuit-pit-cars",
+      category: "מרדפים",
+      title: "רכבי פיטים במרדף",
+      summary:
+        "אם אינכם בשלישייה הראשונה — נתקו מהמרדף ונטרלו את רכב הפיטים. אחרי נטרול — טייזר, אזיקה, והמשיכו במרדף (לא להחזיר לתחנה מיד).",
+      bullets: [
+        "רישום סעיפי האירוע הראשוני גם לרכב הפיטים.",
+        "במרדף על רכב נמלט רגיל — אסור ירי על הרכב/גלגלים (עדכון HANDBOOK).",
+      ],
+      keywords: ["פיט", "pit", "רכב חסימה", "חסימה במרדף"],
+      synonyms: ["פיטים", "רכב עזר"],
+    },
+    {
+      id: "pursuit-pit-maneuver",
+      category: "מרדפים",
+      title: "ביצוע פיט (PIT)",
+      summary: "פיט רק באישור מפקד אירוע — לא במהירות גבוהה, לא באזור מאוכלס/מסוכן.",
+      keywords: ["pit maneuver", "בוקס", "התנגשות"],
+      synonyms: ["פיט מאושר"],
+    },
+    {
+      id: "kof-monkey",
+      category: "מעצרים",
+      title: "הקוף — מעצר מסוכן",
+      summary:
+        "הקוף = Wanted מס' 1, סחר לא חוקי. מעצר מיידי בזהירות, נטרול מהיר, עדכון פיקוד. עלול לברוח מאזיקים.",
+      keywords: ["הקוף", "kof", "wanted", "מסוכן"],
+      synonyms: ["קוף", "הפושע"],
+    },
+    {
+      id: "fingerprints",
+      category: "ראיות",
+      title: "טביעות אצבע ו-UV",
+      summary:
+        "כפפות חובה. טביעות בזירה עם Fingerprint Tape → מעבדה → Forensic באינסידנט. עדכון שם אם קיים במאגר.",
+      keywords: ["טביעות", "uv", "forensic", "כפפות"],
+      synonyms: ["fingerprint", "זיהוי"],
+    },
+    {
+      id: "graffiti",
+      category: "שוטף",
+      title: "Graffiti Remover",
+      summary:
+        "ספריי מהתחנה/חדר משכורות; גם מחיפוש משאית חשודה או שלל שוד מכולה בחדר ראיות.",
+      keywords: ["גרפיטי", "remover", "ספריי"],
+      synonyms: ["graffiti", "ניקוי"],
+    },
+    {
+      id: "vehicles-rank",
+      category: "ציוד",
+      title: "הוצאת רכבים לפי דרגה",
+      summary:
+        "אופיסר+: רוב הרכבים; אינטרספטור לקורפורל+/HighWay; אופנוע סניור+ בשוד בלבד; מסוק באירועים חמורים (שוד מחסן וכו').",
+      keywords: ["רכב", "מסוק", "אינטרספטור", "אופנוע", "דרגה"],
+      synonyms: ["vehicle", "helicopter", "interceptor"],
+    },
+    {
+      id: "channel-break",
+      category: "קשר ורדיו",
+      title: "קשר 9 — הפסקה",
+      summary: "קשר 9 = Break. עדכנו 10-6 ב-Police Chat עם משך ההפסקה.",
+      keywords: ["קשר 9", "הפסקה", "break", "10-6"],
+      synonyms: ["הפסקה", "break room"],
+    },
+    {
+      id: "tunnel-pursuit",
+      category: "מרדפים",
+      title: "מרדף במנהרות",
+      summary:
+        "מנהרות מתחת לעיר — קשה לדיווח מסוק. כניסות: מוניות/ביוב, EMS, תחנה, אפרטמנטס. זהירות מגנרטורים (דלק/פיצוץ).",
+      keywords: ["מנהרה", "tunnel", "מרכז מנהרות"],
+      synonyms: ["תת קרקעי", "רכבת"],
+    },
+    {
+      id: "complaint-desk",
+      category: "תחנה",
+      title: "תלונה על שוטר/אזרח",
+      summary:
+        "תיאום בדלפק → תא חקירות → אינסידנט → עדכון פיקוד במספר אינסידנט. תשובה כעריכה באותו אינסידנט.",
+      keywords: ["תלונה", "דלפק", "תא חקירות"],
+      synonyms: ["complaint", "להגיש תלונה"],
+    },
+    {
+      id: "uniform-rules",
+      category: "משמעת",
+      title: "מדים וציוד לבוש",
+      summary:
+        "מדים תקינים לדרגה; אפוד מגן בפטרול. אסור משקפי מסיבה/מסכות לא מאושרות. מדים פורמליים לטקסים בלבד.",
+      keywords: ["מדים", "אפוד", "לבוש", "משקפיים"],
+      synonyms: ["uniform", "ווסט"],
+    },
   ];
+
+  /** תקציר ליבה — מועבר ל-AI כשאין התאמה חזקה */
+  const HANDBOOK_CORE =
+    "משטרת נברלנד: החוק הראשון — אין להסלים. סיור בזוגות בלבד (לא לבד ללא אישור). " +
+    "קשר 1 = פעילות שוטפת. 10-78 תגבורת, 10-80 מרדף, 10-31 פשע, 10-7 ירידה. " +
+    "פירמידת כוח: ירוק→כחול→כתום→אדום (נשק חם רק בסכנה ממשית לחיים). " +
+    "מרדף: ראשון/שני/שלישי + מאגפים; אסור ירי על רכב/גלגלים במרדף (עדכון HANDBOOK). " +
+    "עצירה שגרתית: יציאה בניגוד לכריזה = טייזר. מעצר בחשד סביר ברור בלבד.";
 
   /** בניית אינדקס חיפוש */
   function buildIndex() {
@@ -424,10 +562,23 @@
    * @param {string} query
    * @param {{ lastProcedureId?: string }} [ctx]
    */
+  function getProcedureById(id) {
+    return procedures.find((p) => p.id === id) || null;
+  }
+
+  function detectIntent(query) {
+    return window.PoliceIntents?.detectIntent?.(query) || null;
+  }
+
   function search(query, ctx, opts) {
     const minScore = opts?.minScore ?? 4;
-    const q = normalize(query);
+    const rawQ = String(query || "");
+    const q = window.PoliceIntents?.normalizeQuery
+      ? window.PoliceIntents.normalizeQuery(rawQ)
+      : normalize(rawQ);
     if (!q) return { type: "empty" };
+
+    const intent = opts?.intent || detectIntent(rawQ);
 
     const followUpHints = ["עוד", "המשך", "פרט", "דוגמה", "ולמה", "איך", "מה עוד"];
     const isFollowUp =
@@ -465,6 +616,12 @@
       if (normalize(proc.title) === q || normalize(proc.id) === q) score += 15;
       if (ctx?.lastProcedureId === proc.id) score += 2;
 
+      if (intent?.procedureIds?.includes(proc.id)) score += 35;
+
+      if (opts?.boostIds?.includes(proc.id)) score += 25;
+
+      if (intent?.id === "officer_alone" && proc.id === "shift-start") score -= 40;
+
       if (score > 0) scored.push({ proc, score });
     });
 
@@ -482,6 +639,7 @@
       procedure: top.proc,
       score: top.score,
       related: related.map((r) => r.proc),
+      intent: intent || undefined,
     };
   }
 
@@ -517,23 +675,74 @@
     return parts.join("\n");
   }
 
-  /** הקשר למודל AI — עד 3 נהלים רלוונטיים */
+  /** הקשר למודל AI — כוונה מבצעית + נהלים רלוונטיים */
   function getContextForQuery(query, ctx) {
-    const result = search(query, ctx, { minScore: 3 });
-    if (result.type !== "hit") return "";
+    const intent = detectIntent(query);
+    const parts = [];
 
-    const list = [result.procedure, ...(result.related || [])].slice(0, 3);
-    return list.map(procedureToText).join("\n\n");
+    if (intent && window.PoliceIntents?.formatOperationalBrief) {
+      parts.push(window.PoliceIntents.formatOperationalBrief(intent));
+      const linked = (intent.procedureIds || [])
+        .map(getProcedureById)
+        .filter(Boolean)
+        .slice(0, 3);
+      if (linked.length) {
+        parts.push("\n--- נהלים קשורים ---\n" + linked.map(procedureToText).join("\n\n"));
+      }
+    }
+
+    const result = search(query, ctx, { minScore: 3, intent });
+    if (result.type === "hit") {
+      const list = [result.procedure, ...(result.related || [])].slice(0, 3);
+      const seen = new Set();
+      const extra = list.filter((p) => {
+        if (seen.has(p.id)) return false;
+        seen.add(p.id);
+        return true;
+      });
+      if (extra.length) {
+        parts.push("\n--- חיפוש במאגר ---\n" + extra.map(procedureToText).join("\n\n"));
+      }
+    }
+
+    if (parts.length === 0) {
+      parts.push("--- ליבת נהלים ---\n" + HANDBOOK_CORE);
+    }
+
+    return parts.join("\n").slice(0, 3800);
   }
 
-  /** תשובה מקומית משופרת כשאין AI */
+  /** תשובה מקומית — סגנון דיספאטש/מדריך */
   function getSmartReply(query, ctx) {
-    const result = search(query, ctx, { minScore: 3 });
+    const intent = detectIntent(query);
+
+    if (intent && window.PoliceIntents?.formatDispatcherReply) {
+      const linked = (intent.procedureIds || [])
+        .map(getProcedureById)
+        .filter(Boolean)
+        .slice(0, 1);
+      let reply = window.PoliceIntents.formatDispatcherReply(intent);
+      if (linked[0]) {
+        reply += "\n\nנהל רלוונטי: " + linked[0].title + " — " + linked[0].summary;
+      }
+      return reply;
+    }
+
+    const result = search(query, ctx, { minScore: 3, intent });
     if (result.type === "empty") {
-      return "שאל אותי על נהלים, קודי רדיו, מרדפים, מעצרים, שימוש בכוח ועוד.";
+      return (
+        "שאלו על מצב מבצעי (לבד בניידת, תגבורת, מרדף, עצירה, ירי) או נהלים.\n" +
+        "דוגמה: \"נשארתי לבד בניידת — מה עושים?\""
+      );
     }
     if (result.type === "miss") {
-      return NOT_FOUND;
+      return (
+        "אין נוהל מדויק במאגר, אבל לפי שיקול דעת בטוח:\n" +
+        "• דווחו בקשר (זיהוי + מיקום + 10-78 אם צריך).\n" +
+        "• אל תסלימו — שמרו מרחק ומחסה.\n" +
+        "• המתינו לגיבוי לפני פעולה מסוכנת.\n\n" +
+        HANDBOOK_CORE
+      );
     }
 
     const items = [result.procedure, ...(result.related || [])].slice(0, 2);
@@ -553,8 +762,11 @@
 
   window.PoliceKnowledge = {
     NOT_FOUND,
+    HANDBOOK_CORE,
     procedures,
     GLOBAL_SYNONYMS,
+    detectIntent,
+    getProcedureById,
     search,
     formatAnswer,
     getContextForQuery,

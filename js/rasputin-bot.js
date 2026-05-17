@@ -7,11 +7,11 @@
   const MAX_TURNS = 14;
 
   const SUGGESTIONS = [
-    "מה עושים במרדף?",
-    "מתי מותר לירות?",
-    "קודי רדיו 10-78 ו-10-80",
-    "איך מתעדים אינסידנט?",
-    "מתי מקריאים מירנדה?",
+    "נשארתי לבד בניידת — מה עושים?",
+    "איך מבקשים תגבורת (10-78)?",
+    "רכב לא עוצר בעצירה",
+    "ירי לעברי — מה עושים?",
+    "אני ראשון בזירה",
   ];
 
   let isLoading = false;
@@ -117,6 +117,17 @@
     if (fab) fab.classList.toggle("rasputin-fab-loading", on);
   }
 
+  function buildIntentBrief(question) {
+    const PI = window.PoliceIntents;
+    const KB = window.PoliceKnowledge;
+    const intent = PI?.detectIntent?.(question) || KB?.detectIntent?.(question);
+    if (!intent || !PI?.formatOperationalBrief) return { intent: null, brief: "" };
+    return {
+      intent,
+      brief: PI.formatOperationalBrief(intent),
+    };
+  }
+
   function buildKnowledgeContext(question) {
     const KB = window.PoliceKnowledge;
     if (!KB?.getContextForQuery) return "";
@@ -145,11 +156,18 @@
 
   async function askAi(question, history) {
     const context = buildKnowledgeContext(question);
+    const { intent, brief: intentBrief } = buildIntentBrief(question);
 
     const res = await fetch(apiUrl("/api/rasputin"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: question, history, context }),
+      body: JSON.stringify({
+        message: question,
+        history,
+        context,
+        intentBrief,
+        intentId: intent?.id || "",
+      }),
     });
 
     const data = await res.json().catch(() => ({}));
@@ -321,9 +339,9 @@
 
   function welcomeMessage() {
     return (
-      "שלום, אני רספוטין — עוזר הנהלים של משטרת נברלנד.\n" +
-      "שאלו על מרדפים, מעצרים, רדיו, דיספאץ' ותיעוד.\n" +
-      "אני זוכר את השיחה במהלך הסשן."
+      "שלום, אני רספוטין — עוזר מבצעי ונהלים של משטרת נברלנד.\n" +
+      "שאלו במילים שלכם: \"נשארתי לבד בניידת\", \"אין גיבוי\", מרדף, עצירה, ירי.\n" +
+      "אענה כמו דיספאטש — קצר, מעשי, עם דגש על בטיחות."
     );
   }
 
