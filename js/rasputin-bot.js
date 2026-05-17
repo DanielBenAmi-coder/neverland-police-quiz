@@ -76,7 +76,7 @@
     el.className = "rasputin-status rasputin-status-warn";
     el.textContent =
       aiStatus.message ||
-      "מצב מאגר מקומי. להפעלת AI: טענו OpenAI או הוסיפו GROQ_API_KEY (חינם) ב-Vercel.";
+      "מצב מאגר מקומי. להפעלת AI: הוסיפו GEMINI_API_KEY ב-Vercel.";
   }
 
   async function checkAiStatus() {
@@ -90,16 +90,14 @@
       const res = await fetch(apiUrl("/api/rasputin"));
       const data = await res.json().catch(() => ({}));
 
-      if (data.hasGroqKey) {
+      if (data.hasGeminiKey) {
         aiStatus = { online: true, mode: "ai", message: "" };
-      } else if (!data.hasOpenAiKey) {
+      } else {
         aiStatus = {
           online: false,
           mode: "local",
-          message: "הוסיפו OPENAI_API_KEY או GROQ_API_KEY (חינם) ב-Vercel.",
+          message: "הוסיפו GEMINI_API_KEY ב-Vercel (Google AI Studio).",
         };
-      } else {
-        aiStatus = { online: true, mode: "ai", message: "" };
       }
     } catch {
       aiStatus = { online: false, mode: "local", message: "לא ניתן לבדוק שרת — מצב מאגר מקומי." };
@@ -165,7 +163,7 @@
       throw new Error(data.error || "שגיאת שרת (" + res.status + ")");
     }
 
-    aiStatus = { online: true, mode: data.provider || "ai", message: "" };
+    aiStatus = { online: true, mode: "ai", message: "" };
     setStatusBanner();
     return data.reply || "";
   }

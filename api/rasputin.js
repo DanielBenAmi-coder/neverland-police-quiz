@@ -1,7 +1,9 @@
 const { handleOptions, jsonResponse } = require("./_lib/cors");
 
-const OPENAI_MODELS = ["gpt-4.1-mini", "gpt-4o-mini"];
-const GROQ_MODEL = "llama-3.3-70b-versatile";
+const GEMINI_MODEL = "gemini-2.5-flash";
+const GEMINI_URL =
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+
 const MAX_HISTORY = 20;
 const MAX_MSG_LEN = 600;
 const MAX_CONTEXT_LEN = 4000;
@@ -35,105 +37,78 @@ function sanitizeHistory(raw) {
     .filter(Boolean);
 }
 
-async function chatCompletion(url, apiKey, model, messages) {
+function buildSystemText(context) {
+  if (!context) return SYSTEM_PROMPT;
+  return (
+    SYSTEM_PROMPT +
+    "\n\n--- מאגר נהלים (Neverland Police Handbook) ---\n" +
+    context
+  );
+}
+
+function buildGeminiContents(history, userMessage) {
+  const contents = history.map((m) => ({
+    role: m.role === "assistant" ? "model" : "user",
+    parts: [{ text: m.content }],
+  }));
+
+  contents.push({
+    role: "user",
+    parts: [{ text: userMessage }],
+  });
+
+  return contents;
+}
+
+async function callGemini(systemText, history, userMessage) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    const err = new Error("GEMINI_API_KEY not configured");
+    err.code = "NO_KEY";
+    throw err;
+  }
+
+  const url = `${GEMINI_URL}?key=${encodeURIComponent(apiKey)}`;
+
   const res = await fetch(url, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      model,
-      messages,
-      temperature: 0.35,
-      max_tokens: 500,
+      systemInstruction: {
+        parts: [{ text: systemText }],
+      },
+      contents: buildGeminiContents(history, userMessage),
+      generationConfig: {
+        temperature: 0.35,
+        maxOutputTokens: 500,
+      },
     }),
   });
 
   const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {
-    const msg = data?.error?.message || `API error ${res.status}`;
+    const msg =
+      data?.error?.message ||
+      data?.[0]?.error?.message ||
+      `Gemini API error ${res.status}`;
     const err = new Error(msg);
     err.apiStatus = res.status;
+    if (/quota|resource.exhausted|billing/i.test(msg)) err.code = "QUOTA";
     throw err;
   }
 
-  const reply = data?.choices?.[0]?.message?.content;
-  if (!reply) throw new Error("Empty model response");
-  return reply.trim();
-}
+  const reply = data?.candidates?.[0]?.content?.parts
+    ?.map((p) => p.text || "")
+    .join("")
+    .trim();
 
-function isQuotaError(msg) {
-  return /quota|billing|insufficient|exceeded/i.test(msg || "");
-}
-
-async function callOpenAI(messages) {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    const err = new Error("OPENAI_API_KEY not configured");
-    err.code = "NO_KEY";
-    throw err;
+  if (!reply) {
+    const blockReason = data?.candidates?.[0]?.finishReason;
+    throw new Error(blockReason ? `Blocked: ${blockReason}` : "Empty Gemini response");
   }
 
-  let lastError = null;
-
-  for (const model of OPENAI_MODELS) {
-    try {
-      const reply = await chatCompletion(
-        "https://api.openai.com/v1/chat/completions",
-        apiKey,
-        model,
-        messages
-      );
-      return { reply, model, provider: "openai" };
-    } catch (err) {
-      lastError = err;
-      const retryable =
-        err.apiStatus === 404 ||
-        /model/i.test(err.message) ||
-        /does not exist/i.test(err.message);
-      if (!retryable && !isQuotaError(err.message)) break;
-    }
-  }
-
-  if (lastError) {
-    if (isQuotaError(lastError.message)) lastError.code = "QUOTA";
-    throw lastError;
-  }
-  throw new Error("OpenAI request failed");
-}
-
-async function callGroq(messages) {
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) {
-    const err = new Error("GROQ_API_KEY not configured");
-    err.code = "NO_GROQ";
-    throw err;
-  }
-
-  const reply = await chatCompletion(
-    "https://api.groq.com/openai/v1/chat/completions",
-    apiKey,
-    GROQ_MODEL,
-    messages
-  );
-  return { reply, model: GROQ_MODEL, provider: "groq" };
-}
-
-async function callLlm(messages) {
-  try {
-    return await callOpenAI(messages);
-  } catch (openaiErr) {
-    if (process.env.GROQ_API_KEY && (openaiErr.code === "QUOTA" || isQuotaError(openaiErr.message))) {
-      try {
-        return await callGroq(messages);
-      } catch (groqErr) {
-        console.error("Groq fallback failed:", groqErr.message);
-      }
-    }
-    throw openaiErr;
-  }
+  return reply;
 }
 
 module.exports = async function handler(req, res) {
@@ -148,10 +123,8 @@ module.exports = async function handler(req, res) {
       {
         ok: true,
         service: "rasputin",
-        hasOpenAiKey: Boolean(process.env.OPENAI_API_KEY),
-        hasGroqKey: Boolean(process.env.GROQ_API_KEY),
-        models: OPENAI_MODELS,
-        groqModel: GROQ_MODEL,
+        hasGeminiKey: Boolean(process.env.GEMINI_API_KEY),
+        model: GEMINI_MODEL,
       },
       origin
     );
@@ -175,33 +148,20 @@ module.exports = async function handler(req, res) {
 
   const history = sanitizeHistory(body.history);
   const context = sanitizeText(body.context, MAX_CONTEXT_LEN);
-
-  const systemParts = [SYSTEM_PROMPT];
-  if (context) {
-    systemParts.push(
-      "\n\n--- מאגר נהלים (Neverland Police Handbook) ---\n" + context
-    );
-  }
-
-  const messages = [{ role: "system", content: systemParts.join("") }, ...history, { role: "user", content: message }];
+  const systemText = buildSystemText(context);
 
   try {
-    const result = await callLlm(messages);
-    return jsonResponse(
-      res,
-      200,
-      { ok: true, reply: result.reply, model: result.model, provider: result.provider },
-      origin
-    );
+    const reply = await callGemini(systemText, history, message);
+    return jsonResponse(res, 200, { ok: true, reply }, origin);
   } catch (err) {
     console.error("Rasputin API:", err.message);
 
-    if (err.code === "NO_KEY" || err.message.includes("OPENAI_API_KEY")) {
+    if (err.code === "NO_KEY" || err.message.includes("GEMINI_API_KEY")) {
       return jsonResponse(
         res,
         503,
         {
-          error: "מפתח OpenAI לא מוגדר ב-Vercel. הוסיפו OPENAI_API_KEY ועשו Redeploy.",
+          error: "מפתח Gemini לא מוגדר ב-Vercel. הוסיפו GEMINI_API_KEY ועשו Redeploy.",
           code: "NO_KEY",
         },
         origin
@@ -209,13 +169,12 @@ module.exports = async function handler(req, res) {
     }
 
     let userMsg = "שגיאה בעיבוד התשובה. נסו שוב בעוד רגע.";
-    let code = "OPENAI_ERROR";
+    let code = "GEMINI_ERROR";
 
-    if (/incorrect api key/i.test(err.message) || err.apiStatus === 401) {
-      userMsg = "מפתח OpenAI לא תקין. בדקו את OPENAI_API_KEY ב-Vercel.";
-    } else if (err.code === "QUOTA" || isQuotaError(err.message)) {
-      userMsg =
-        "אין יתרה ב-OpenAI. הוסיפו GROQ_API_KEY (חינם) ב-Vercel או טענו Billing ב-OpenAI.";
+    if (/api key|invalid|permission|401|403/i.test(err.message) || err.apiStatus === 401 || err.apiStatus === 403) {
+      userMsg = "מפתח Gemini לא תקין. בדקו את GEMINI_API_KEY ב-Vercel.";
+    } else if (err.code === "QUOTA" || /quota|exhausted/i.test(err.message)) {
+      userMsg = "אין יתרה ב-Gemini. בדקו מכסה ב-Google AI Studio.";
       code = "QUOTA";
     }
 
