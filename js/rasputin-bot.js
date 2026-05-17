@@ -288,6 +288,8 @@
       hideTyping();
       appendMessage("bot", reply);
 
+      window.NeverlandDiscord?.rasputin?.(text, reply, aiStatus.mode);
+
       saveHistory([
         ...priorHistory,
         { role: "user", content: text },

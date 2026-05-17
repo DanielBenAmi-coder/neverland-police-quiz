@@ -118,6 +118,8 @@
       await window.NeverlandLogs.push(entry);
     }
 
+    window.NeverlandDiscord?.fromTracking?.(entry);
+
     return entry;
   }
 
