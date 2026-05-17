@@ -399,7 +399,8 @@
    * @param {string} query
    * @param {{ lastProcedureId?: string }} [ctx]
    */
-  function search(query, ctx) {
+  function search(query, ctx, opts) {
+    const minScore = opts?.minScore ?? 4;
     const q = normalize(query);
     if (!q) return { type: "empty" };
 
@@ -444,7 +445,7 @@
 
     scored.sort((a, b) => b.score - a.score);
 
-    if (scored.length === 0 || scored[0].score < 4) {
+    if (scored.length === 0 || scored[0].score < minScore) {
       return { type: "miss" };
     }
 
@@ -493,11 +494,36 @@
 
   /** הקשר למודל AI — עד 3 נהלים רלוונטיים */
   function getContextForQuery(query, ctx) {
-    const result = search(query, ctx);
+    const result = search(query, ctx, { minScore: 3 });
     if (result.type !== "hit") return "";
 
     const list = [result.procedure, ...(result.related || [])].slice(0, 3);
     return list.map(procedureToText).join("\n\n");
+  }
+
+  /** תשובה מקומית משופרת כשאין AI */
+  function getSmartReply(query, ctx) {
+    const result = search(query, ctx, { minScore: 3 });
+    if (result.type === "empty") {
+      return "שאל אותי על נהלים, קודי רדיו, מרדפים, מעצרים, שימוש בכוח ועוד.";
+    }
+    if (result.type === "miss") {
+      return NOT_FOUND;
+    }
+
+    const items = [result.procedure, ...(result.related || [])].slice(0, 2);
+    const parts = ["לפי נהלי משטרת נברלנד:\n"];
+
+    items.forEach((p, i) => {
+      parts.push("\n" + (i + 1) + ". " + p.title);
+      parts.push(p.summary);
+      if (p.bullets?.length) {
+        p.bullets.slice(0, 3).forEach((b) => parts.push("• " + b));
+      }
+    });
+
+    parts.push("\nמקור: מאגר הנהלים · " + items[0].category);
+    return parts.join("\n");
   }
 
   window.PoliceKnowledge = {
@@ -507,6 +533,7 @@
     search,
     formatAnswer,
     getContextForQuery,
+    getSmartReply,
     procedureToText,
     getCategories() {
       return [...new Set(procedures.map((p) => p.category))];

@@ -15,6 +15,7 @@
   ];
 
   let isLoading = false;
+  let aiStatus = { online: false, mode: "unknown", message: "" };
   let lastProcedureId = sessionStorage.getItem(LAST_PROC_KEY) || "";
 
   function cfg() {
@@ -62,6 +63,51 @@
     return escapeHtml(text).replace(/\n/g, "<br>");
   }
 
+  function setStatusBanner() {
+    const el = document.getElementById("rasputin-status");
+    if (!el) return;
+
+    if (aiStatus.online) {
+      el.className = "rasputin-status rasputin-status-ok hidden";
+      el.textContent = "";
+      return;
+    }
+
+    el.className = "rasputin-status rasputin-status-warn";
+    el.textContent =
+      aiStatus.message ||
+      "מצב מאגר מקומי. להפעלת AI: טענו OpenAI או הוסיפו GROQ_API_KEY (חינם) ב-Vercel.";
+  }
+
+  async function checkAiStatus() {
+    if (!canUseAiApi()) {
+      aiStatus = { online: false, mode: "local", message: "מצב מאגר מקומי (ללא API)." };
+      setStatusBanner();
+      return;
+    }
+
+    try {
+      const res = await fetch(apiUrl("/api/rasputin"));
+      const data = await res.json().catch(() => ({}));
+
+      if (data.hasGroqKey) {
+        aiStatus = { online: true, mode: "ai", message: "" };
+      } else if (!data.hasOpenAiKey) {
+        aiStatus = {
+          online: false,
+          mode: "local",
+          message: "הוסיפו OPENAI_API_KEY או GROQ_API_KEY (חינם) ב-Vercel.",
+        };
+      } else {
+        aiStatus = { online: true, mode: "ai", message: "" };
+      }
+    } catch {
+      aiStatus = { online: false, mode: "local", message: "לא ניתן לבדוק שרת — מצב מאגר מקומי." };
+    }
+
+    setStatusBanner();
+  }
+
   function setLoading(on) {
     isLoading = on;
     const input = document.getElementById("rasputin-input");
@@ -77,13 +123,26 @@
     const KB = window.PoliceKnowledge;
     if (!KB?.getContextForQuery) return "";
 
-    const hit = KB.search(question, { lastProcedureId });
+    const hit = KB.search(question, { lastProcedureId }, { minScore: 3 });
     if (hit.type === "hit" && hit.procedure?.id) {
       lastProcedureId = hit.procedure.id;
       sessionStorage.setItem(LAST_PROC_KEY, lastProcedureId);
     }
 
     return KB.getContextForQuery(question, { lastProcedureId });
+  }
+
+  function askLocal(question) {
+    const KB = window.PoliceKnowledge;
+    if (!KB) return "מאגר הנהלים לא נטען. רעננו את הדף.";
+    if (KB.getSmartReply) return KB.getSmartReply(question, { lastProcedureId });
+
+    const result = KB.search(question, { lastProcedureId });
+    if (result.type === "hit" && result.procedure?.id) {
+      lastProcedureId = result.procedure.id;
+      sessionStorage.setItem(LAST_PROC_KEY, lastProcedureId);
+    }
+    return KB.formatAnswer(result);
   }
 
   async function askAi(question, history) {
@@ -96,42 +155,30 @@
     });
 
     const data = await res.json().catch(() => ({}));
+
     if (!res.ok) {
-      const msg = data.error || "שגיאת שרת (" + res.status + ")";
-      const extra = data.detail ? "\n(" + data.detail + ")" : "";
-      throw new Error(msg + extra);
+      if (data.useLocal || data.code === "QUOTA") {
+        aiStatus = { online: false, mode: "local", message: data.error || aiStatus.message };
+        setStatusBanner();
+        return askLocal(question);
+      }
+      throw new Error(data.error || "שגיאת שרת (" + res.status + ")");
     }
+
+    aiStatus = { online: true, mode: data.provider || "ai", message: "" };
+    setStatusBanner();
     return data.reply || "";
   }
 
-  function askLocal(question) {
-    const KB = window.PoliceKnowledge;
-    if (!KB) return "מאגר הנהלים לא נטען. רעננו את הדף.";
-
-    const result = KB.search(question, { lastProcedureId });
-    if (result.type === "hit" && result.procedure?.id) {
-      lastProcedureId = result.procedure.id;
-      sessionStorage.setItem(LAST_PROC_KEY, lastProcedureId);
-    }
-    return KB.formatAnswer(result);
-  }
-
   async function getReply(question, priorHistory) {
-    if (canUseAiApi()) {
-      try {
-        return await askAi(question, priorHistory || []);
-      } catch (err) {
-        console.warn("Rasputin AI:", err.message);
-        if (window.PoliceKnowledge) {
-          return (
-            askLocal(question) +
-            "\n\n(מצב גיבוי — תשובה ממאגר מקומי. ודאו OPENAI_API_KEY ב-Vercel.)"
-          );
-        }
-        throw err;
-      }
+    if (!canUseAiApi()) return askLocal(question);
+
+    try {
+      return await askAi(question, priorHistory || []);
+    } catch (err) {
+      console.warn("Rasputin AI:", err.message);
+      return askLocal(question);
     }
-    return askLocal(question);
   }
 
   function appendMessage(role, text) {
@@ -248,6 +295,7 @@
       panel.classList.remove("hidden");
       fab.setAttribute("aria-expanded", "true");
       document.getElementById("rasputin-input")?.focus();
+      checkAiStatus();
     } else {
       panel.classList.add("hidden");
       fab.setAttribute("aria-expanded", "false");
@@ -274,16 +322,10 @@
   }
 
   function welcomeMessage() {
-    if (canUseAiApi()) {
-      return (
-        "שלום, אני רספוטין — עוזר ה-AI של משטרת נברלנד.\n" +
-        "שאלו אותי על נהלים, מרדפים, מעצרים, רדיו, דיספאץ' ותיעוד.\n" +
-        "אני זוכר את השיחה שלנו במהלך הסשן."
-      );
-    }
     return (
-      "שלום, אני רספוטין.\n" +
-      "כרגע במצב מקומי (ללא API). פרסמו ב-Vercel עם OPENAI_API_KEY לעוזר AI מלא."
+      "שלום, אני רספוטין — עוזר הנהלים של משטרת נברלנד.\n" +
+      "שאלו על מרדפים, מעצרים, רדיו, דיספאץ' ותיעוד.\n" +
+      "אני זוכר את השיחה במהלך הסשן."
     );
   }
 
@@ -320,6 +362,7 @@
 
     renderSuggestions();
     bind();
+    checkAiStatus();
 
     const history = loadHistory();
     if (history.length === 0) {
@@ -337,9 +380,5 @@
     init();
   }
 
-  window.RasputinBot = {
-    getReply,
-    togglePanel,
-    clearHistory: () => sessionStorage.removeItem(HISTORY_KEY),
-  };
+  window.RasputinBot = { getReply, togglePanel, checkAiStatus };
 })();
