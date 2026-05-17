@@ -590,6 +590,45 @@
       label: state.rankConfig?.title || state.category || state.mode,
     });
 
+    const name = window.NeverlandTracking?.getName?.();
+    if (name && window.NeverlandHistory?.save) {
+      const wrongs = state.answers
+        .filter((a) => !a.correct)
+        .map((a) => {
+          const prepared = state.questions.find((x) => x.id === a.questionId);
+          const src = getSourceQuestion(prepared) || prepared;
+          if (!src) return null;
+          let selectedText = "לא ענו";
+          if (a.selected >= 0 && prepared?.shuffledOptions) {
+            selectedText = prepared.shuffledOptions[a.selected] || selectedText;
+          }
+          return {
+            questionId: a.questionId,
+            question: src.q,
+            selectedText,
+            correctText: getCorrectAnswerText(prepared || src),
+            category: src.category,
+            type: prepared?.type || src.type,
+          };
+        })
+        .filter(Boolean);
+
+      window.NeverlandHistory.save({
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+        ts: new Date().toISOString(),
+        name,
+        mode: state.mode,
+        rank: state.rankLevel,
+        category: state.category,
+        label: state.rankConfig?.title || state.category || state.mode,
+        score: pct,
+        passed,
+        total,
+        correctCount: correctCount,
+        wrongs,
+      });
+    }
+
     showScreen("results");
   }
 
@@ -656,6 +695,9 @@
     }
     if (window.NeverlandAdmin?.init) {
       window.NeverlandAdmin.init();
+    }
+    if (window.NeverlandHistoryUI?.init) {
+      window.NeverlandHistoryUI.init();
     }
     init();
   }

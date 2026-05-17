@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=7" />
+  <link rel="stylesheet" href="css/style.css?v=8" />
 </head>
 <body>
   <div class="bg-grid" aria-hidden="true"></div>
@@ -48,6 +48,10 @@
           <h3>לפי נושא</h3>
           <p>25 שאלות לנושא · סוגים מעורבים</p>
         </button>
+      </div>
+
+      <div class="history-entry-wrap">
+        <button type="button" class="btn btn-ghost" id="btn-my-history">היסטוריית הבחינות שלי</button>
       </div>
 
       <div class="stats-bar" id="stats-bar">
@@ -133,6 +137,33 @@
       </div>
     </section>
 
+    <section id="screen-history" class="screen">
+      <div class="history-top">
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-history-back">חזרה לדף הבית</button>
+        <h2>היסטוריית בחינות — <span id="history-officer-name"></span></h2>
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-history-refresh">רענון</button>
+      </div>
+
+      <p id="history-status" class="history-status"></p>
+
+      <div id="history-summary" class="history-summary"></div>
+
+      <div class="history-section">
+        <h3>מגמת ציונים (12 אחרונים)</h3>
+        <div id="history-trend-chart" class="history-trend-chart"></div>
+      </div>
+
+      <div class="history-section">
+        <h3>טעויות חוזרות</h3>
+        <ul id="history-mistakes-list" class="history-mistakes-list"></ul>
+      </div>
+
+      <div class="history-section">
+        <h3>בחינות ותרגולים</h3>
+        <ul id="history-exam-list" class="history-exam-list"></ul>
+      </div>
+    </section>
+
     <section id="screen-admin" class="screen">
       <div class="admin-top">
         <button type="button" class="btn btn-ghost btn-sm" id="btn-admin-back">חזרה לדף הבית</button>
@@ -140,7 +171,7 @@
       </div>
 
       <div id="admin-login-panel" class="admin-panel">
-        <p class="admin-hint">הזינו קוד מנהל לצפייה בלוגי שימוש לפי שם שוטר.</p>
+        <p class="admin-hint">הזינו קוד מנהל לצפייה בלוגי כל השוטרים (מהשרת המשותף).</p>
         <form id="admin-login-form" class="admin-login-form">
           <label for="admin-code-input">קוד מנהל</label>
           <input type="password" id="admin-code-input" class="admin-input" autocomplete="off" />
@@ -181,13 +212,15 @@
     <button type="button" class="footer-admin-link" id="btn-admin-entry">כניסת מנהל</button>
   </footer>
 
-  <script src="js/site-config.js?v=7"></script>
-  <script src="js/logs-store.js?v=7"></script>
-  <script src="js/tracking.js?v=7"></script>
-  <script src="js/admin.js?v=7"></script>
-  <script src="js/questions.js?v=7"></script>
-  <script src="js/questions-extra.js?v=7"></script>
-  <script src="js/question-levels.js?v=7"></script>
-  <script src="js/app.js?v=7"></script>
+  <script src="js/site-config.js?v=8"></script>
+  <script src="js/logs-store.js?v=8"></script>
+  <script src="js/history-store.js?v=8"></script>
+  <script src="js/tracking.js?v=8"></script>
+  <script src="js/history.js?v=8"></script>
+  <script src="js/admin.js?v=8"></script>
+  <script src="js/questions.js?v=8"></script>
+  <script src="js/questions-extra.js?v=8"></script>
+  <script src="js/question-levels.js?v=8"></script>
+  <script src="js/app.js?v=8"></script>
 </body>
 </html>

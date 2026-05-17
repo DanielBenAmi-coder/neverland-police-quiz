@@ -11,7 +11,9 @@
   }
 
   function hasApi() {
-    return Boolean((cfg().apiBase || "").trim());
+    if ((cfg().apiBase || "").trim()) return true;
+    const host = window.location.hostname;
+    return host.includes("vercel.app") || host === "localhost" || host === "127.0.0.1";
   }
 
   function supabaseHeaders() {
@@ -145,8 +147,9 @@
       return "local";
     },
 
-    async fetchAll(adminCode, limit) {
+    async fetchAll(adminCode, limit, opts) {
       const cap = limit || 500;
+      const adminOnly = opts?.adminOnly === true;
       const batches = [];
 
       if (hasSupabase()) {
@@ -165,10 +168,17 @@
         }
       }
 
-      const local = window.NeverlandTracking?.getLocalLogs?.() || [];
-      batches.push(local);
+      if (!adminOnly) {
+        const local = window.NeverlandTracking?.getLocalLogs?.() || [];
+        batches.push(local);
+      }
 
       return mergeById(batches.flat());
+    },
+
+    /** לוח מנהל — רק שרת משותף, בלי לוגים מקומיים של הדפדפן הנוכחי */
+    async fetchForAdmin(adminCode, limit) {
+      return this.fetchAll(adminCode, limit, { adminOnly: true });
     },
   };
 })();

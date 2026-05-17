@@ -1,5 +1,7 @@
 const LOG_KEY = "np:activity:logs";
+const HISTORY_KEY = "np:quiz:history";
 const MAX_LOGS = 2000;
+const MAX_HISTORY = 3000;
 
 function getMemLogs() {
   if (!globalThis.__NP_ACTIVITY_LOGS) {
@@ -70,4 +72,70 @@ async function readLogs(limit = 300) {
   return getMemLogs().slice(0, cap);
 }
 
-module.exports = { appendLog, readLogs, LOG_KEY };
+function getMemHistory() {
+  if (!globalThis.__NP_QUIZ_HISTORY) {
+    globalThis.__NP_QUIZ_HISTORY = [];
+  }
+  return globalThis.__NP_QUIZ_HISTORY;
+}
+
+async function appendHistory(entry) {
+  const raw = JSON.stringify(entry);
+
+  try {
+    const pushed = await upstash("LPUSH", HISTORY_KEY, raw);
+    if (pushed) {
+      await upstash("LTRIM", HISTORY_KEY, 0, MAX_HISTORY - 1);
+      return { ok: true, store: "redis" };
+    }
+  } catch (err) {
+    console.error("Redis history append failed:", err.message);
+  }
+
+  const mem = getMemHistory();
+  mem.unshift(entry);
+  if (mem.length > MAX_HISTORY) mem.length = MAX_HISTORY;
+  return { ok: true, store: "memory" };
+}
+
+async function readHistory(limit = 200, nameFilter) {
+  const cap = Math.min(Math.max(limit, 1), 500);
+  let rows = [];
+
+  try {
+    const data = await upstash("LRANGE", HISTORY_KEY, 0, cap - 1);
+    if (data && Array.isArray(data.result)) {
+      rows = data.result
+        .map((line) => {
+          try {
+            return JSON.parse(line);
+          } catch {
+            return null;
+          }
+        })
+        .filter(Boolean);
+    }
+  } catch (err) {
+    console.error("Redis history read failed:", err.message);
+  }
+
+  if (rows.length === 0) {
+    rows = getMemHistory().slice(0, cap);
+  }
+
+  if (nameFilter) {
+    const q = String(nameFilter).trim().toLowerCase();
+    rows = rows.filter((r) => (r.name || "").trim().toLowerCase() === q);
+  }
+
+  return rows;
+}
+
+module.exports = {
+  appendLog,
+  readLogs,
+  appendHistory,
+  readHistory,
+  LOG_KEY,
+  HISTORY_KEY,
+};

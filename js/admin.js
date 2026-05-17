@@ -174,7 +174,7 @@
 
     if (status) status.textContent = "טוען לוגים...";
 
-    cachedLogs = await window.NeverlandLogs.fetchAll(code, 500);
+    cachedLogs = await window.NeverlandLogs.fetchForAdmin(code, 500);
 
     renderStats(cachedLogs);
     const filter = document.getElementById("admin-filter-name")?.value || "";
@@ -187,10 +187,10 @@
       if (hasCloud) {
         status.textContent = `לוגים מ-${names} שוטרים · סה"כ ${cachedLogs.length} אירועים (שרת משותף)`;
       } else if (cachedLogs.length > 0) {
-        status.textContent = `לוגים מקומיים בלבד (${cachedLogs.length}). הגדירו Supabase ב-site-config.js ללוגים מכל השוטרים.`;
+        status.textContent = `נמצאו ${cachedLogs.length} אירועים מהשרת.`;
       } else {
         status.textContent =
-          "אין לוגים עדיין. שוטרים צריכים להיכנס עם שם בשרת ולתרגל.";
+          "אין לוגים בשרת. ודאו ש-UPSTASH_REDIS (Vercel) או Supabase מוגדרים — לוגים מקומיים לא מוצגים כאן.";
       }
     }
   }

@@ -879,3 +879,185 @@ body.gate-open {
 .admin-table-nested {
   font-size: 0.8rem;
 }
+
+.history-entry-wrap {
+  margin: 0.75rem 0 0.25rem;
+  text-align: center;
+}
+
+.history-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.history-top h2 {
+  font-size: 1.05rem;
+  flex: 1;
+  min-width: 140px;
+}
+
+.history-status {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 0.75rem;
+}
+
+.history-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.history-stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem;
+  text-align: center;
+}
+
+.history-stat .num {
+  display: block;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--gold);
+}
+
+.history-stat .lbl {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.history-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.history-section h3 {
+  font-size: 0.95rem;
+  margin-bottom: 0.75rem;
+  color: var(--gold);
+}
+
+.history-muted {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.history-trend-chart {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 120px;
+  padding: 0.5rem 0;
+}
+
+.trend-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 2.2rem;
+  height: 110px;
+  justify-content: flex-end;
+}
+
+.trend-bar {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  min-height: 4px;
+  transition: height 0.2s;
+}
+
+.trend-bar.pass {
+  background: var(--success);
+}
+
+.trend-bar.fail {
+  background: var(--error);
+}
+
+.trend-bar-score {
+  font-size: 0.65rem;
+  font-weight: 700;
+  margin-top: 0.2rem;
+}
+
+.trend-bar-idx {
+  font-size: 0.6rem;
+  color: var(--muted);
+}
+
+.history-exam-list,
+.history-mistakes-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.history-exam-item {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.65rem 0.75rem;
+}
+
+.history-exam-item.pass {
+  border-color: rgba(34, 197, 94, 0.35);
+}
+
+.history-exam-item.fail {
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.history-exam-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.history-exam-score {
+  font-weight: 800;
+  color: var(--gold);
+}
+
+.history-exam-meta {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: 0.25rem;
+}
+
+.history-mistake-item {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.85rem;
+}
+
+.history-mistake-item .mistake-count {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--error);
+  background: rgba(239, 68, 68, 0.12);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  margin-left: 0.35rem;
+}
+
+.history-mistake-item p {
+  color: var(--muted);
+  font-size: 0.78rem;
+  margin-top: 0.25rem;
+}
