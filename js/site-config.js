@@ -7,15 +7,15 @@
  * או: הוסיפו ב-GitHub Secrets את SUPABASE_URL ו-SUPABASE_ANON_KEY
  */
 (function () {
+  const VERCEL_API = "https://neverland-police-quiz.vercel.app";
   const host = window.location.hostname;
   let apiBase = "";
 
-  if (host.includes("vercel.app") || host === "localhost" || host === "127.0.0.1") {
+  if (host.includes("github.io")) {
+    apiBase = VERCEL_API;
+  } else if (host.includes("vercel.app") || host === "localhost" || host === "127.0.0.1") {
     apiBase = "";
   }
-
-  // GitHub Pages: הגדירו כתובת Vercel ל-API (רספוטין AI, לוגים)
-  // apiBase = "https://your-project.vercel.app";
 
   window.SITE_CONFIG = {
     adminCode: "Rasputin",
