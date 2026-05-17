@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=8" />
+  <link rel="stylesheet" href="css/style.css?v=9" />
 </head>
 <body>
   <div class="bg-grid" aria-hidden="true"></div>
@@ -207,20 +207,63 @@
     </div>
   </div>
 
+  <!-- Rasputin — עוזר נהלים -->
+  <button
+    type="button"
+    id="rasputin-fab"
+    class="rasputin-fab"
+    aria-label="פתיחת צ'אט רספוטין"
+    aria-expanded="false"
+    aria-controls="rasputin-panel"
+  >
+    <img src="assets/rasputin.png" alt="" class="rasputin-fab-img" width="36" height="36" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden');" />
+    <span class="rasputin-fab-fallback hidden" aria-hidden="true">R</span>
+    <span class="rasputin-fab-label">רספוטין</span>
+  </button>
+
+  <div id="rasputin-panel" class="rasputin-panel hidden" role="dialog" aria-labelledby="rasputin-title">
+    <header class="rasputin-header">
+      <img src="assets/rasputin.png" alt="" class="rasputin-header-avatar" width="40" height="40" onerror="this.classList.add('avatar-fallback');this.removeAttribute('src');" />
+      <div class="rasputin-header-text">
+        <h2 id="rasputin-title">רספוטין</h2>
+        <p>עוזר נהלים · Neverland Police</p>
+      </div>
+      <button type="button" id="rasputin-close" class="rasputin-close" aria-label="סגירה">×</button>
+    </header>
+
+    <div id="rasputin-suggestions" class="rasputin-suggestions"></div>
+
+    <div id="rasputin-messages" class="rasputin-messages" aria-live="polite"></div>
+
+    <form id="rasputin-form" class="rasputin-form">
+      <input
+        type="text"
+        id="rasputin-input"
+        class="rasputin-input"
+        placeholder="שאל על נהלים, מרדפים, רדיו..."
+        maxlength="300"
+        autocomplete="off"
+      />
+      <button type="submit" class="btn btn-primary rasputin-send">שלח</button>
+    </form>
+  </div>
+
   <footer class="site-footer">
     <p>Neverland Police Handbook · לשימוש פנימי בלבד</p>
     <button type="button" class="footer-admin-link" id="btn-admin-entry">כניסת מנהל</button>
   </footer>
 
-  <script src="js/site-config.js?v=8"></script>
-  <script src="js/logs-store.js?v=8"></script>
-  <script src="js/history-store.js?v=8"></script>
-  <script src="js/tracking.js?v=8"></script>
-  <script src="js/history.js?v=8"></script>
-  <script src="js/admin.js?v=8"></script>
-  <script src="js/questions.js?v=8"></script>
-  <script src="js/questions-extra.js?v=8"></script>
-  <script src="js/question-levels.js?v=8"></script>
-  <script src="js/app.js?v=8"></script>
+  <script src="js/site-config.js?v=9"></script>
+  <script src="js/police-knowledge.js?v=9"></script>
+  <script src="js/rasputin-bot.js?v=9"></script>
+  <script src="js/logs-store.js?v=9"></script>
+  <script src="js/history-store.js?v=9"></script>
+  <script src="js/tracking.js?v=9"></script>
+  <script src="js/history.js?v=9"></script>
+  <script src="js/admin.js?v=9"></script>
+  <script src="js/questions.js?v=9"></script>
+  <script src="js/questions-extra.js?v=9"></script>
+  <script src="js/question-levels.js?v=9"></script>
+  <script src="js/app.js?v=9"></script>
 </body>
 </html>
